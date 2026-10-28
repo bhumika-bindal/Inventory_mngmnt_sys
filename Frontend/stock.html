@@ -15,7 +15,7 @@
       <header class="topbar">
         <div class="topbar-left">
           <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
-          <div class="page-breadcrumb">Operations / <strong>Stock In & Out</strong></div>
+          <div class="page-breadcrumb">Operations / <strong>Asset Inward & Deployments</strong></div>
         </div>
         <div class="topbar-right">
           <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
@@ -25,32 +25,32 @@
       <div class="content-area">
         <div class="page-header">
           <div class="page-title">
-            <h1>Stock Movement Engine</h1>
-            <p>Execute atomic inventory restock (IN) and distribution issue (OUT) transactions.</p>
+            <h1>Asset Movement & Deployment Engine</h1>
+            <p>Track hardware procurement receipts (IN) and project deployments for Government/Enterprise clients (OUT).</p>
           </div>
         </div>
 
         <!-- Transaction Entry Card -->
         <div class="card">
           <div class="card-header">
-            <h2>Record Stock Transaction</h2>
+            <h2>Log Hardware / License Movement</h2>
             <span class="pill pill-primary">ACID Compliant</span>
           </div>
           <div class="card-body">
             <form id="stockForm">
               <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap:16px; margin-bottom:16px;">
                 <div class="form-group">
-                  <label for="sProduct">Select Inventory Product *</label>
+                  <label for="sProduct">Select Hardware / Software Item *</label>
                   <select id="sProduct" required onchange="handleProductSelect()">
-                    <option value="">-- Choose Product --</option>
+                    <option value="">-- Choose Equipment --</option>
                   </select>
                 </div>
 
                 <div class="form-group">
-                  <label for="sType">Movement Type *</label>
+                  <label for="sType">Movement Classification *</label>
                   <select id="sType" required onchange="updateStockPreview()">
-                    <option value="IN">Stock IN (Procurement / Restock)</option>
-                    <option value="OUT">Stock OUT (Sales / Issue)</option>
+                    <option value="IN">Asset Inward (Procurement from OEM)</option>
+                    <option value="OUT">Project Deployment (Issued to Client / Team)</option>
                   </select>
                 </div>
 

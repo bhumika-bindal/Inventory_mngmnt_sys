@@ -1,39 +1,40 @@
 # System Design & Architecture Document
-## Inventory Management System (IMS)
-**Prepared by:** Bhumika  
-**Project Phase:** System Design (Phase 2)  
-**Target Completion Date:** 30 September 2026  
-**Document Version:** 2.0  
-**Supervisor / Reviewer:** Anshul Dogra  
+## iONE IT Solutions – Enterprise Asset & Inventory Management System (iONE IMS)
+**Company:** iONE IT Solutions Pvt. Ltd. (Noida, India)  
+**Author:** Bhumika (Full Stack Intern)  
+**Supervisor / Mentor:** Anshul Dogra  
+**Phase:** System Design (Phase 2)  
+**Document Version:** 3.0  
 
 ---
 
-## 1. System Architecture Overview
+## 1. 3-Tier Enterprise Architecture
 
-The Inventory Management System adopts a robust **3-Tier Client-Server Architecture** designed for high throughput, low latency, and clear separation of concerns.
+The iONE IMS adopts a resilient 3-Tier architecture engineered to support high-value infrastructure management across iONE's Noida HQ, development centers, and client project deployments.
 
 ```mermaid
 flowchart TD
-    subgraph Tier1["Presentation Tier (Client Browser)"]
-        UI["Modern Vanilla JS / HTML5 / CSS3"]
-        V1["Dashboard & KPI Cards"]
-        V2["Products & Categories View"]
-        V3["Stock In/Out & Ledger View"]
-        V4["Analytics & Chart.js Visuals"]
-        UI --> V1 & V2 & V3 & V4
+    subgraph Tier1["Presentation Tier (Client Browser / Web Interface)"]
+        UI["iONE Corporate UI (HTML5 / Modern CSS3 / Vanilla JS)"]
+        V1["Executive Dashboard & Visual KPIs"]
+        V2["Enterprise Assets & Equipment Catalog"]
+        V3["Technology Domains & OEM Directory"]
+        V4["Asset Inward & Client Deployments Engine"]
+        V5["Interactive Chart.js Visualizations"]
+        UI --> V1 & V2 & V3 & V4 & V5
     end
 
-    subgraph Tier2["Application / API Tier (Node.js + Express.js)"]
-        Server["Express.js HTTP Server (:3000)"]
-        MW1["CORS & Body Parser Middleware"]
+    subgraph Tier2["Application / API Tier (Node.js + Express.js :3000)"]
+        Server["Express.js Server Engine"]
+        MW1["CORS & JSON Body Parser"]
         MW2["JWT Authentication Guard (Bearer Token)"]
         MW3["Centralized Error Handling Middleware"]
         R1["Auth Router (/api/auth)"]
-        R2["Products Router (/api/products)"]
-        R3["Categories Router (/api/categories)"]
-        R4["Suppliers Router (/api/suppliers)"]
-        R5["Stock Router (/api/stock)"]
-        R6["Dashboard Router (/api/dashboard)"]
+        R2["Products / Assets Router (/api/products)"]
+        R3["Categories / Domains Router (/api/categories)"]
+        R4["OEM Partners Router (/api/suppliers)"]
+        R5["Stock Movements Router (/api/stock)"]
+        R6["Executive Dashboard Router (/api/dashboard)"]
 
         Server --> MW1 --> MW2 --> R1 & R2 & R3 & R4 & R5 & R6 --> MW3
     end
@@ -41,11 +42,11 @@ flowchart TD
     subgraph Tier3["Data Tier (MySQL 8.0 Database)"]
         Pool["mysql2 Connection Pool (Limit: 10)"]
         DB[(MySQL Database: 'ims')]
-        T1["users"]
-        T2["products"]
-        T3["categories"]
-        T4["suppliers"]
-        T5["stock_movements"]
+        T1["users (Admin Credentials)"]
+        T2["categories (Technology Domains)"]
+        T3["suppliers (OEM Partners)"]
+        T4["products (Enterprise Hardware & Licenses)"]
+        T5["stock_movements (Deployment Audit Trail)"]
 
         Pool --> DB
         DB --> T1 & T2 & T3 & T4 & T5
@@ -57,127 +58,75 @@ flowchart TD
 
 ---
 
-## 2. Data Flow Diagrams (DFD)
-
-### 2.1 DFD Level 0 (Context Level Diagram)
-The Level 0 DFD illustrates external entities interacting with the boundaries of the IMS.
-
-```mermaid
-flowchart LR
-    Admin["Admin / Inventory Manager"]
-    System[("Inventory Management System")]
-    DB[("MySQL Database")]
-
-    Admin --"1. Login Credentials"--> System
-    System --"2. Auth Token (JWT) & Dashboard Metrics"--> Admin
-    Admin --"3. Product & Stock Transactions"--> System
-    System --"4. Real-time Alerts & Reports"--> Admin
-
-    System --"5. SQL Queries / Transactions"--> DB
-    DB --"6. Result Sets & Row Counts"--> System
-```
-
-### 2.2 DFD Level 1 (Decomposed Functional Processes)
+## 2. DFD Level 1 (iONE Deployment Flow)
 
 ```mermaid
 flowchart TD
-    User(["Admin User"])
+    Admin(["iONE IT Officer / Bhumika"])
 
     subgraph Processes["System Subsystems"]
-        P1["1.0 User Authentication"]
-        P2["2.0 Catalog & Category Engine"]
-        P3["3.0 Supplier Management Engine"]
-        P4["4.0 Stock Transaction Engine"]
-        P5["5.0 Analytics & Reporting Engine"]
+        P1["1.0 JWT Authentication Engine"]
+        P2["2.0 Enterprise Asset & Domain Catalog"]
+        P3["3.0 OEM Partner Directory"]
+        P4["4.0 ACID Deployment & Inward Engine"]
+        P5["5.0 Executive BI & Audit Reporting"]
     end
 
-    subgraph Storage["Data Stores"]
+    subgraph Storage["MySQL Relational Stores"]
         D1[("users table")]
-        D2[("products table")]
-        D3[("categories table")]
-        D4[("suppliers table")]
-        D5[("stock_movements table")]
+        D2[("products (Assets)")]
+        D3[("categories (Domains)")]
+        D4[("suppliers (OEMs)")]
+        D5[("stock_movements (Audit)")]
     end
 
-    User --"Credentials"--> P1
+    Admin --"Login Credentials"--> P1
     P1 --"Verify Hash"--> D1
-    P1 --"Issue JWT"--> User
+    P1 --"Issue JWT Token"--> Admin
 
-    User --"Product & Category CRUD"--> P2
-    P2 <--> D2
-    P2 <--> D3
+    Admin --"Manage Hardware & Licenses"--> P2
+    P2 <--> D2 & D3
 
-    User --"Supplier Information"--> P3
+    Admin --"Manage Partners (Oracle, Dell, Cisco)"--> P3
     P3 <--> D4
 
-    User --"Stock IN / Stock OUT"--> P4
-    P4 --"Lock & Update Qty"--> D2
-    P4 --"Insert Movement Log"--> D5
+    Admin --"Inward / Client Deployment"--> P4
+    P4 --"Lock Row & Adjust Stock"--> D2
+    P4 --"Record Deployment Log"--> D5
 
-    User --"View Metrics & Export"--> P5
-    P5 <-- "Read Quantities & Prices" --> D2
-    P5 <-- "Read Audit Trail" --> D5
-    P5 --"Aggregated KPIs & CSV File"--> User
+    Admin --"View Dashboard & Export CSV"--> P5
+    P5 <-- "Read Valuations & Counts" --> D2 & D5
+    P5 --"Aggregated Metrics & CSV File"--> Admin
 ```
 
 ---
 
-## 3. Sequence Diagrams (Key System Interactions)
-
-### 3.1 Authentication & Token Issuance Flow
-Illustrates secure administrative authentication using salted bcrypt verification and signed JSON Web Tokens.
+## 3. Sequence Diagram (Client Project Deployment with ACID Lock)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Admin User (Browser)
-    participant Client as Frontend (api.js)
-    participant AuthRoute as /api/auth/login
-    participant DB as MySQL (users)
+    actor DeliveryMgr as Delivery Lead / Admin
+    participant UI as iONE Frontend
+    participant Route as /api/stock (POST)
+    participant DB as MySQL InnoDB Engine
 
-    User->>Client: Enters username & password
-    Client->>AuthRoute: POST { username, password }
-    AuthRoute->>DB: SELECT * FROM users WHERE username = ?
-    DB-->>AuthRoute: Return user record (with bcrypt hash)
-    
-    alt User not found or password mismatch
-        AuthRoute-->>Client: HTTP 401 Unauthorized { error: 'Invalid credentials' }
-        Client-->>User: Display error message toast
-    else Password matches bcrypt.compare()
-        AuthRoute->>AuthRoute: Generate JWT (expiresIn: 2h)
-        AuthRoute-->>Client: HTTP 200 OK { token: 'jwt...', username: 'admin' }
-        Client->>Client: localStorage.setItem('token', token)
-        Client-->>User: Redirect to dashboard.html
-    end
-```
+    DeliveryMgr->>UI: Submits Deployment (Dell R750, Type: 'OUT', Qty: 3, Project: 'Central Ministry')
+    UI->>Route: POST /api/stock with JWT Bearer Token
+    Route->>DB: conn.beginTransaction()
+    Route->>DB: SELECT quantity, name FROM products WHERE id = 1 FOR UPDATE
+    DB-->>Route: Returns current quantity (e.g. 15)
 
-### 3.2 Stock IN / OUT Transaction with ACID Rollback
-Guarantees inventory consistency through atomic database transactions.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Warehouse Manager
-    participant Client as Frontend UI
-    participant StockRoute as /api/stock (POST)
-    participant DB as MySQL Engine
-
-    User->>Client: Submits Stock Movement (Product, Type: 'OUT', Qty: 25)
-    Client->>StockRoute: POST /api/stock with Bearer Token
-    StockRoute->>DB: conn.beginTransaction()
-    StockRoute->>DB: SELECT quantity FROM products WHERE id = ? FOR UPDATE
-    DB-->>StockRoute: Returns current quantity (e.g. 50)
-
-    alt Insufficient Stock (current < requested Qty)
-        StockRoute->>DB: conn.rollback()
-        StockRoute-->>Client: HTTP 400 Bad Request { error: 'Not enough stock' }
-        Client-->>User: Show warning alert toast
-    else Stock Available
-        StockRoute->>DB: UPDATE products SET quantity = current - 25 WHERE id = ?
-        StockRoute->>DB: INSERT INTO stock_movements (product_id, type, quantity, note)
-        StockRoute->>DB: conn.commit()
-        StockRoute-->>Client: HTTP 200 OK { message: 'Stock updated', newQty: 25 }
-        Client-->>User: Show success toast & update stock table in real-time
+    alt Insufficient Inventory
+        Route->>DB: conn.rollback()
+        Route-->>UI: HTTP 400 Bad Request { error: 'Insufficient stock...' }
+        UI-->>DeliveryMgr: Display warning toast
+    else Adequate Stock
+        Route->>DB: UPDATE products SET quantity = 15 - 3 WHERE id = 1
+        Route->>DB: INSERT INTO stock_movements (product_id, type: 'OUT', qty: 3, note: 'Central Ministry')
+        Route->>DB: conn.commit()
+        Route-->>UI: HTTP 200 OK { message: 'Stock issued successfully', newQty: 12 }
+        UI-->>DeliveryMgr: Show success toast & live update data table
     end
 ```
 
@@ -185,37 +134,16 @@ sequenceDiagram
 
 ## 4. RESTful API Specification
 
-All protected endpoints require an HTTP header:  
-`Authorization: Bearer <jwt_token>`
+All protected endpoints require: `Authorization: Bearer <jwt_token>`
 
-| Method | Endpoint | Access | Request Body / Query Params | Expected Success Response | HTTP Status |
-|---|---|---|---|---|---|
-| `POST` | `/api/auth/login` | Public | `{ username, password }` | `{ token: "..." }` | 200 |
-| `POST` | `/api/auth/register` | Public/Admin | `{ username, password }` | `{ message: "User created" }` | 201 |
-| `GET` | `/api/products` | Protected | `?search=&category_id=&supplier_id=` | `[ { id, name, price, quantity, category, supplier, ... } ]` | 200 |
-| `GET` | `/api/products/:id` | Protected | None | `{ id, name, price, quantity, ... }` | 200 |
-| `POST` | `/api/products` | Protected | `{ name, category_id, supplier_id, price, quantity, low_stock_limit }` | `{ id: 10, message: "Product created" }` | 201 |
-| `PUT` | `/api/products/:id` | Protected | `{ name, category_id, supplier_id, price, quantity, low_stock_limit }` | `{ message: "Product updated" }` | 200 |
-| `DELETE` | `/api/products/:id` | Protected | None | `{ message: "Product deleted" }` | 200 |
-| `GET` | `/api/categories` | Protected | None | `[ { id, name, product_count } ]` | 200 |
-| `POST` | `/api/categories` | Protected | `{ name }` | `{ id: 4, message: "Category created" }` | 201 |
-| `PUT` | `/api/categories/:id` | Protected | `{ name }` | `{ message: "Category updated" }` | 200 |
-| `DELETE` | `/api/categories/:id` | Protected | None | `{ message: "Category deleted" }` | 200 |
-| `GET` | `/api/suppliers` | Protected | None | `[ { id, name, phone, email, address, product_count } ]` | 200 |
-| `POST` | `/api/suppliers` | Protected | `{ name, phone, email, address }` | `{ id: 2, message: "Supplier created" }` | 201 |
-| `PUT` | `/api/suppliers/:id` | Protected | `{ name, phone, email, address }` | `{ message: "Supplier updated" }` | 200 |
-| `DELETE` | `/api/suppliers/:id` | Protected | None | `{ message: "Supplier deleted" }` | 200 |
-| `POST` | `/api/stock` | Protected | `{ product_id, type: 'IN'\|'OUT', quantity, note }` | `{ message: "Stock updated", newQty: 30 }` | 200 |
-| `GET` | `/api/stock` | Protected | `?product_id=&type=` | `[ { id, product_name, type, quantity, note, date } ]` | 200 |
-| `GET` | `/api/dashboard/summary` | Protected | None | `{ totalProducts, totalValuation, lowStockCount, totalSuppliers, totalCategories }` | 200 |
-| `GET` | `/api/dashboard/charts` | Protected | None | `{ movementsTrend: [...], categoryDistribution: [...] }` | 200 |
-
----
-
-## 5. Security Architecture & Threat Modeling
-
-1. **Stateless Authentication:** JSON Web Tokens (JWT) signed with `HS256` algorithm and protected by a private secret in `.env`. Tokens expire in 2 hours.
-2. **Password Cryptography:** User passwords are never saved in plain text. Hashed with bcrypt utilizing 10 salt rounds.
-3. **Defense Against SQL Injection:** Strict parameterized queries across all database drivers (`db.query('... WHERE id = ?', [id])`), preventing arbitrary SQL injection attacks.
-4. **Data Concurrency & Race Conditions:** Critical stock deductions use explicit row-level locking (`SELECT ... FOR UPDATE`) inside an ACID transaction block.
-5. **Cross-Origin Resource Sharing (CORS):** Express server incorporates `cors()` middleware to regulate permitted client origins.
+- `POST /api/auth/login` – Corporate admin authentication.
+- `GET /api/products` – Retrieve enterprise equipment with filtering (`?search=&category_id=&supplier_id=&status=`).
+- `POST /api/products` – Add new hardware / license asset.
+- `PUT /api/products/:id` – Modify asset details.
+- `DELETE /api/products/:id` – Decommission an asset.
+- `GET /api/categories` – List technology domains with asset counts.
+- `GET /api/suppliers` – List OEM partners (Oracle, Cisco, Dell, Zebra, etc.).
+- `POST /api/stock` – Atomic asset inward (IN) or client project deployment (OUT).
+- `GET /api/stock` – Historical deployment trail with date range filters.
+- `GET /api/dashboard/summary` – Enterprise KPI aggregates ($\sum price \times qty$, low stock, supplier counts).
+- `GET /api/dashboard/charts` – Inward vs deployment trends for Chart.js.

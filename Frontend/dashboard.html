@@ -3,24 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - IMS Inventory Management System</title>
+  <title>iONE IT Solutions - Executive Asset Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- Chart.js CDN for interactive visual analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
   <div class="app-container">
-    <!-- Sidebar Mount -->
     <div id="sidebar-mount"></div>
 
-    <!-- Main Content Shell -->
     <main class="main-shell">
-      <!-- Topbar Header -->
       <header class="topbar">
         <div class="topbar-left">
           <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
-          <div class="page-breadcrumb">Overview / <strong>Dashboard</strong></div>
+          <div class="page-breadcrumb">iONE Operations / <strong>Executive Dashboard</strong></div>
         </div>
         <div class="topbar-right">
           <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
@@ -28,19 +24,18 @@
         </div>
       </header>
 
-      <!-- Dashboard Content -->
       <div class="content-area">
         <div class="page-header">
           <div class="page-title">
-            <h1 id="welcomeUser">Dashboard Overview</h1>
-            <p>Real-time analytics, inventory valuation, and stock health monitoring.</p>
+            <h1 id="welcomeUser">iONE IT Solutions Dashboard</h1>
+            <p>Real-time monitoring of mission-critical Cloud, AI, Cybersecurity, and Enterprise IT assets.</p>
           </div>
           <div style="display:flex; gap:10px;">
-            <a href="stock.html" class="btn-primary" style="width:auto; padding:10px 16px;">
-              <span>+ Record Movement</span>
+            <a href="stock.html" class="btn-primary" style="width:auto; padding:10px 16px; background:#1d4ed8;">
+              <span>+ Log Asset Movement</span>
             </a>
             <a href="products.html" class="btn-secondary">
-              <span>View Catalog</span>
+              <span>View Asset Catalog</span>
             </a>
           </div>
         </div>
@@ -48,47 +43,47 @@
         <!-- 5 KPI Stat Cards Grid -->
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon primary">📦</div>
+            <div class="stat-icon primary">🖥️</div>
             <div class="stat-details">
-              <div class="stat-label">Total Products</div>
+              <div class="stat-label">Enterprise Assets</div>
               <div class="stat-value" id="kpiProducts">--</div>
-              <div class="stat-sub"><span id="kpiStockUnits">--</span> total stock units</div>
+              <div class="stat-sub"><span id="kpiStockUnits">--</span> total hardware & license units</div>
             </div>
           </div>
 
           <div class="stat-card">
             <div class="stat-icon success">₹</div>
             <div class="stat-details">
-              <div class="stat-label">Total Inventory Value</div>
+              <div class="stat-label">Total Asset Valuation</div>
               <div class="stat-value" id="kpiValuation">₹--</div>
-              <div class="stat-sub">Based on current unit prices</div>
+              <div class="stat-sub">Enterprise infrastructure value</div>
             </div>
           </div>
 
           <div class="stat-card">
             <div class="stat-icon warning">⚠️</div>
             <div class="stat-details">
-              <div class="stat-label">Low Stock Alerts</div>
+              <div class="stat-label">Critical Restock Alerts</div>
               <div class="stat-value" id="kpiLowStock" style="color:var(--warning);">--</div>
-              <div class="stat-sub">Items requiring replenishment</div>
+              <div class="stat-sub">Items below safety stock threshold</div>
             </div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-icon info">🏢</div>
+            <div class="stat-icon info">🤝</div>
             <div class="stat-details">
-              <div class="stat-label">Active Suppliers</div>
+              <div class="stat-label">OEM Partners</div>
               <div class="stat-value" id="kpiSuppliers">--</div>
-              <div class="stat-sub">Registered vendor partners</div>
+              <div class="stat-sub">Oracle, Cisco, Dell, Zebra & OEMs</div>
             </div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-icon purple">🔄</div>
+            <div class="stat-icon purple">📦</div>
             <div class="stat-details">
-              <div class="stat-label">Total Movements</div>
+              <div class="stat-label">Deployments & Inward</div>
               <div class="stat-value" id="kpiMovements">--</div>
-              <div class="stat-sub">Stock IN / OUT transactions</div>
+              <div class="stat-sub">Client deployments & stock receipts</div>
             </div>
           </div>
         </div>
@@ -97,8 +92,8 @@
         <div class="charts-grid">
           <div class="card">
             <div class="card-header">
-              <h2>Stock Movement Trends (In vs. Out)</h2>
-              <span class="pill pill-primary">Audit Log Activity</span>
+              <h2>Asset Movement & Deployment Trends (Inward vs. Outward)</h2>
+              <span class="pill pill-primary">iONE Project Deployments</span>
             </div>
             <div class="card-body">
               <canvas id="trendChart" height="230"></canvas>
@@ -107,7 +102,7 @@
 
           <div class="card">
             <div class="card-header">
-              <h2>Inventory by Category</h2>
+              <h2>Infrastructure by Domain</h2>
               <span class="pill pill-neutral">Distribution</span>
             </div>
             <div class="card-body">
@@ -119,25 +114,25 @@
         <!-- Low Stock Alerts Table Section -->
         <div class="card">
           <div class="card-header">
-            <h2>Critical Low-Stock Notifications</h2>
-            <a href="products.html" class="btn-sm btn-sm-action">Manage Products →</a>
+            <h2>Critical Infrastructure Low-Stock Notifications</h2>
+            <a href="products.html" class="btn-sm btn-sm-action">Manage Catalog →</a>
           </div>
           <div class="table-responsive">
             <table>
               <thead>
                 <tr>
-                  <th>Product Name</th>
-                  <th>Category</th>
-                  <th>Supplier</th>
-                  <th>Unit Price</th>
-                  <th>On-Hand Qty</th>
+                  <th>Equipment / Asset Name</th>
+                  <th>Technology Domain</th>
+                  <th>OEM / Partner</th>
+                  <th>Unit Valuation</th>
+                  <th>In-Stock Qty</th>
                   <th>Threshold</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody id="lowStockBody">
-                <tr><td colspan="8" style="text-align:center; padding:24px; color:var(--slate-500);">Loading stock intelligence...</td></tr>
+                <tr><td colspan="8" style="text-align:center; padding:24px; color:var(--slate-500);">Loading asset intelligence...</td></tr>
               </tbody>
             </table>
           </div>
@@ -150,32 +145,32 @@
   <div class="modal-overlay" id="quickRestockModal">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3 id="restockTitle">Quick Restock</h3>
+        <h3 id="restockTitle">Procure / Inward Asset Restock</h3>
         <button class="modal-close" onclick="closeModal('quickRestockModal')">✕</button>
       </div>
       <form id="quickRestockForm">
         <div class="modal-body">
           <input type="hidden" id="restockProductId">
           <div class="form-group">
-            <label>Product</label>
+            <label>Asset / Hardware Item</label>
             <input type="text" id="restockProductName" readonly style="background:var(--slate-100);">
           </div>
           <div class="form-group">
-            <label>Current Stock</label>
+            <label>Current On-Hand Stock</label>
             <input type="text" id="restockCurrentQty" readonly style="background:var(--slate-100);">
           </div>
           <div class="form-group">
-            <label for="restockUnits">Quantity to Add (IN)</label>
-            <input type="number" id="restockUnits" min="1" value="20" required>
+            <label for="restockUnits">Units to Procure / Inward (IN)</label>
+            <input type="number" id="restockUnits" min="1" value="10" required>
           </div>
           <div class="form-group">
-            <label for="restockNote">Restock Reference / Note</label>
-            <input type="text" id="restockNote" placeholder="e.g. Urgent restock order received">
+            <label for="restockNote">Procurement Reference / PO Number</label>
+            <input type="text" id="restockNote" placeholder="e.g. Inward under PO-2026-Dell-089 for Noida DC">
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" onclick="closeModal('quickRestockModal')">Cancel</button>
-          <button type="submit" class="btn-primary" style="width:auto;">Confirm Stock IN</button>
+          <button type="submit" class="btn-primary" style="width:auto; background:#1d4ed8;">Confirm Inward Stock</button>
         </div>
       </form>
     </div>
@@ -190,15 +185,13 @@
       weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
     });
 
-    const user = localStorage.getItem('ims_user') || 'Admin';
-    document.getElementById('welcomeUser').textContent = `Welcome, ${user}! 👋`;
+    const user = localStorage.getItem('ims_user') || 'Bhumika';
+    document.getElementById('welcomeUser').textContent = `Welcome, ${user}! 👋 (iONE Noida)`;
 
     let trendChartInstance = null;
     let catChartInstance = null;
 
-    // Load Dashboard Summary Data
     async function loadDashboard() {
-      // 1. Fetch KPI Summary
       const summaryRes = await apiFetch('/dashboard/summary');
       if (summaryRes && summaryRes.ok) {
         const s = summaryRes.data;
@@ -210,7 +203,6 @@
         document.getElementById('kpiMovements').textContent = s.totalMovements;
       }
 
-      // 2. Fetch Charts & Alerts Data
       const chartsRes = await apiFetch('/dashboard/charts');
       if (chartsRes && chartsRes.ok) {
         renderCharts(chartsRes.data);
@@ -218,13 +210,10 @@
       }
     }
 
-    // Render Chart.js Visualizations
     function renderCharts(data) {
-      // Chart 1: Stock Movement In vs Out Trend
       const trendCtx = document.getElementById('trendChart').getContext('2d');
       if (trendChartInstance) trendChartInstance.destroy();
 
-      // Aggregate trend dates
       const dates = [...new Set(data.movementTrends.map(m => m.move_date.substring(0, 10)))];
       const inData = dates.map(d => {
         const match = data.movementTrends.find(m => m.move_date.substring(0, 10) === d && m.type === 'IN');
@@ -238,16 +227,16 @@
       trendChartInstance = new Chart(trendCtx, {
         type: 'bar',
         data: {
-          labels: dates.length ? dates : ['No Data'],
+          labels: dates.length ? dates : ['Recent'],
           datasets: [
             {
-              label: 'Stock IN (Added)',
+              label: 'Asset Inward / Procurement (IN)',
               data: inData.length ? inData : [0],
               backgroundColor: '#10b981',
               borderRadius: 4
             },
             {
-              label: 'Stock OUT (Issued)',
+              label: 'Client Project Deployment (OUT)',
               data: outData.length ? outData : [0],
               backgroundColor: '#ef4444',
               borderRadius: 4
@@ -261,7 +250,6 @@
         }
       });
 
-      // Chart 2: Category Distribution
       const catCtx = document.getElementById('categoryChart').getContext('2d');
       if (catChartInstance) catChartInstance.destroy();
 
@@ -274,7 +262,7 @@
           labels: catLabels.length ? catLabels : ['General'],
           datasets: [{
             data: catCounts.length ? catCounts : [1],
-            backgroundColor: ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
+            backgroundColor: ['#1d4ed8', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
           }]
         },
         options: {
@@ -284,14 +272,13 @@
       });
     }
 
-    // Render Low Stock Items Table
     function renderLowStockTable(items) {
       const tbody = document.getElementById('lowStockBody');
       if (!items || items.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="8" style="text-align:center; padding:30px; color:#059669; font-weight:600;">
-              🎉 All inventory items are adequately stocked above their threshold limits!
+              🎉 All enterprise hardware & software licenses are adequately stocked!
             </td>
           </tr>
         `;
@@ -303,12 +290,12 @@
           <td><strong>${p.name}</strong></td>
           <td><span class="pill pill-neutral">${p.category || 'Unassigned'}</span></td>
           <td>${p.supplier || 'Unassigned'}</td>
-          <td>₹${Number(p.price).toFixed(2)}</td>
+          <td>₹${Number(p.price).toLocaleString('en-IN')}</td>
           <td><strong style="color:var(--danger);">${p.quantity}</strong></td>
           <td>${p.low_stock_limit}</td>
           <td>
             <span class="pill pill-danger">
-              ${p.quantity === 0 ? 'Out of Stock' : 'Low Stock'}
+              ${p.quantity === 0 ? 'Depleted' : 'Critical Stock'}
             </span>
           </td>
           <td>
@@ -320,13 +307,12 @@
       `).join('');
     }
 
-    // Quick Restock Handler
     function openRestockModal(id, name, qty) {
       document.getElementById('restockProductId').value = id;
       document.getElementById('restockProductName').value = name;
       document.getElementById('restockCurrentQty').value = `${qty} units`;
-      document.getElementById('restockUnits').value = 25;
-      document.getElementById('restockNote').value = 'Quick replenishment from Dashboard alert';
+      document.getElementById('restockUnits').value = 10;
+      document.getElementById('restockNote').value = 'Emergency replenishment order for iONE project delivery';
       openModal('quickRestockModal');
     }
 
@@ -347,7 +333,7 @@
       });
 
       if (res && res.ok) {
-        showToast('Stock replenished successfully!', 'success');
+        showToast('Asset stock replenished successfully!', 'success');
         closeModal('quickRestockModal');
         loadDashboard();
       } else {

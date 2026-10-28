@@ -1,114 +1,95 @@
-# Inventory Management System (IMS)
+# iONE IT Solutions – Enterprise Asset & Inventory Management System (iONE IMS)
 
+[![Company](https://img.shields.io/badge/Company-iONE%20IT%20Solutions-0f2b48.svg)](https://ioneitsolutions.com/en)
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-green.svg)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-v5.x-blue.svg)](https://expressjs.com/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
-[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+[![ISO 27001](https://img.shields.io/badge/ISO-27001%3A2022-brightgreen.svg)](https://ioneitsolutions.com/en)
+[![CMMI Level 3](https://img.shields.io/badge/CMMI-Level%203-blue.svg)](https://ioneitsolutions.com/en)
 
-An enterprise-grade, full-stack **Inventory Management System (IMS)** built with **Node.js, Express.js, MySQL 8.0, and modern Vanilla HTML5/CSS3/JavaScript**.
+An enterprise-grade, full-stack **Enterprise Asset & Infrastructure Inventory Management System (IMS)** designed for **iONE IT Solutions Pvt. Ltd.** to manage high-value Cloud, AI, Cybersecurity, and Enterprise IT hardware, software licenses, and project deployments.
 
-Designed and developed by **Bhumika** as an internship project under the guidance of **Anshul Dogra**.
+Developed by **Bhumika** as an internship project under the guidance of **Anshul Dogra** at **iONE IT Solutions** (Noida Development Center).
+
+---
+
+## 🏢 About iONE IT Solutions
+**Engineering Digital Nations. Since 2009.**
+
+iONE IT Solutions is a premier enterprise digital transformation partner delivering mission-critical Cloud, ERP, AI, Cybersecurity, and Managed Services to Governments, public utilities, and large enterprises across 3 continents.
+- **15+ Years** of Enterprise IT Excellence
+- **500+** Mission-Critical Projects Delivered
+- **50+** Enterprise & Government Clients
+- **100%** Go-Live Success Rate
+- **OEM Partnerships:** Oracle Gold Partner, AWS Advanced Partner, Google Cloud Partner, Microsoft Gold Partner, SAP Partner
+
+**Corporate Headquarters:** 16th Floor, Hope Tower, Galaxy Blue Sapphire Plaza, Sector-4, Greater Noida 201309  
+**Development Center:** 5th Floor, B-9A, Green Boulevard, Tower B, Sector-62, Noida 201301  
 
 ---
 
 ## 📋 Table of Contents
-1. [Key Features](#-key-features)
-2. [Tech Stack](#-tech-stack)
-3. [System Architecture](#-system-architecture)
-4. [Database Design](#-database-design)
+1. [Core Features](#-core-features)
+2. [Tracked Enterprise Assets](#-tracked-enterprise-assets)
+3. [Technology Stack](#-technology-stack)
+4. [System Architecture](#-system-architecture)
 5. [Getting Started & Installation](#-getting-started--installation)
 6. [Demo Credentials](#-demo-credentials)
-7. [RESTful API Endpoints](#-restful-api-endpoints)
-8. [Project Milestones & Deliverables](#-project-milestones--deliverables)
+7. [API Endpoints](#-api-endpoints)
+8. [Project Milestones](#-project-milestones)
 
 ---
 
-## 🌟 Key Features
+## 🌟 Core Features
 
-### 1. Executive Dashboard & Visual Analytics
-- **Live KPI Counters:** Real-time metrics for Total Products, Total Inventory Valuation (₹), Low-Stock Warnings, Registered Suppliers, and Total Movements.
-- **Dynamic Charts (Chart.js):** 
-  - Stock Movement Trends (Inbound restocks vs. Outbound distribution).
-  - Category Volume Distribution (Interactive doughnut chart).
-- **Instant Restock Action:** One-click quick restock modal directly from low-stock notification alerts.
+### 1. Executive Asset Dashboard & Analytics
+- **Enterprise KPI Widgets:** Real-time visibility into Total Enterprise Assets, Inventory Valuation (₹4.8+ Crores), Critical Stock Depletion Alerts, OEM Partners, and Deployment Logs.
+- **Visual Trend Analytics (Chart.js):**
+  - Asset Inward (Procurement) vs. Client Project Deployments.
+  - Domain Breakdown: Cloud Servers, SOC Security, Workstations, Licenses, and iTRACE WMS IoT.
+- **Instant Restock Action:** 1-click procurement modal triggered directly from low-stock notification alerts.
 
-### 2. Product Catalog Management
-- Full CRUD operations with category and supplier associations.
-- Live search filtering by product name, category, or supplier.
-- Multi-dimensional status filtering (`In Stock`, `Low Stock`, `Out of Stock`).
-- Customizable safety stock threshold (`low_stock_limit`).
+### 2. Enterprise Hardware & License Catalog
+- Comprehensive catalog tracking servers, switches, workstations, licenses, and WMS/HRMS devices.
+- Dynamic search filtering by asset name, technology domain, or OEM vendor.
+- Multi-dimensional status filtering (`In Stock`, `Low Stock`, `Depleted`).
 
-### 3. Category & Supplier Management
-- Manage product categories with dynamic product count badges.
-- Centralized supplier directory tracking contact phone, email, and facility addresses.
+### 3. Technology Domains & Strategic OEM Partners
+- **Technology Domains:** Cloud & Server Infrastructure, Networking & Cybersecurity, Developer Workstations, Enterprise Software Licenses, iTRACE WMS IoT, and iHRMS Biometrics.
+- **OEM Directory:** Vendor repository tracking Oracle India, Dell Technologies, Cisco Systems, Fortinet, and Zebra Technologies.
 
-### 4. Stock In / Stock Out Engine (ACID Transactions)
-- **Stock IN (Procurement):** Increments on-hand stock and logs transaction metadata.
-- **Stock OUT (Sales / Issue):** Deducts stock with database row-level locking (`SELECT ... FOR UPDATE`) preventing negative stock counts.
-- **Real-Time Projection Preview:** Calculates projected stock before transaction execution.
+### 4. ACID-Compliant Inward & Deployment Engine
+- **Asset Inward (IN):** Logs incoming OEM shipments against Purchase Orders.
+- **Project Deployment (OUT):** Tracks equipment issued to Central Ministry e-Governance projects, state PSU utilities, and internal engineering teams with database row-level locking (`SELECT ... FOR UPDATE`).
+- **Real-Time Projection Preview:** Instantly calculates projected on-hand stock prior to transaction execution.
 
-### 5. Movement Audit Trail & CSV Export
-- Chronological immutable ledger of all historical stock adjustments.
-- Date range filtering and movement type filtering.
-- **One-Click CSV Export:** Generates downloadable Excel/Sheets compatible `.csv` audit spreadsheets.
-- Printer-friendly stylesheet for management reports.
-
-### 6. Security & Stateless Authentication
-- Salted password hashing with `bcryptjs` (10 rounds).
-- Stateless JWT (JSON Web Tokens) with 2-hour session expiration.
-- SQL injection prevention via 100% parameterized queries with `mysql2/promise`.
+### 5. Deployment Audit Trail & 1-Click CSV Export
+- Immutable audit ledger supporting ISO 27001 and government asset compliance.
+- Filter deployments by date range, asset, or movement classification.
+- **Export to CSV:** Generates downloadable Excel/Sheets compatible `.csv` reports.
 
 ---
 
-## 🛠️ Tech Stack
+## 🖥️ Tracked Enterprise Assets
 
-| Layer | Technologies Used |
-|---|---|
-| **Frontend** | Vanilla HTML5, CSS3 (Modern SaaS Design System), JavaScript (ES6+), Chart.js |
-| **Backend** | Node.js, Express.js (v5.x), REST API Architecture |
-| **Database** | MySQL 8.0, InnoDB Storage Engine, Connection Pooling |
-| **Authentication** | JSON Web Tokens (`jsonwebtoken`), Password Hashing (`bcryptjs`) |
-| **Environment** | `dotenv`, `cors` |
-
----
-
-## 🏗️ System Architecture
-
-The application adopts a clean **3-Tier Client-Server Architecture**:
-```
-[Client Browser] <---> [Express.js REST API (:3000)] <---> [MySQL Database ('ims')]
-  - HTML5/CSS3           - JWT Auth Middleware              - users
-  - Vanilla JS           - Route Handlers                   - products
-  - Chart.js             - Centralized Error Handler        - categories
-  - Toast & Modals       - Static Asset Hosting             - suppliers
-                                                            - stock_movements
-```
-
----
-
-## 📊 Database Design
-
-The relational schema includes referential constraints, composite indexes, and cascading rules:
-- **`users`** (`id`, `username`, `password`, `created_at`)
-- **`categories`** (`id`, `name`, `description`, `created_at`)
-- **`suppliers`** (`id`, `name`, `phone`, `email`, `address`, `created_at`)
-- **`products`** (`id`, `name`, `category_id`, `supplier_id`, `price`, `quantity`, `low_stock_limit`, `created_at`, `updated_at`)
-- **`stock_movements`** (`id`, `product_id`, `type`, `quantity`, `note`, `date`)
-
-Detailed documentation available in:
-- [`IMS_Requirements.md`](IMS_Requirements.md) – Software Requirements Specification (SRS)
-- [`IMS_ER_Diagram.md`](IMS_ER_Diagram.md) – Entity-Relationship Diagram with Mermaid
-- [`IMS_System_Design.md`](IMS_System_Design.md) – System Architecture, DFDs & Sequence Diagrams
-- [`IMS_UIUX_Design.md`](IMS_UIUX_Design.md) – UI/UX Wireframes & Design System
-- [`IMS_Schema.sql`](IMS_Schema.sql) – Complete MySQL Schema & Initial Seed Data
+| Asset / Hardware Item | Domain | OEM Partner | Initial Valuation (₹) |
+|---|---|---|---|
+| **Dell PowerEdge R750 Rack Server** (2x Xeon Gold, 128GB RAM) | Cloud & Server Infra | Dell Technologies | ₹4,85,000 |
+| **HPE ProLiant DL380 Gen10 Server** (OCI Hybrid Gateway) | Cloud & Server Infra | Dell Technologies | ₹3,95,000 |
+| **Cisco Catalyst 9300 48-Port PoE+ Switch** | Networking & Security | Cisco Systems India | ₹2,25,000 |
+| **Fortinet FortiGate 100F Next-Gen Firewall** (24x7 SOC) | Networking & Security | Fortinet India | ₹1,85,000 |
+| **MacBook Pro 16" M3 Max** (36GB RAM, 1TB SSD) - Tech Lead | Workstations | Apple / Corporate Dist. | ₹3,19,900 |
+| **Lenovo ThinkPad T14 Gen 4** (AMD Ryzen 7 PRO, 32GB) | Workstations | Lenovo / Corporate Dist. | ₹1,28,500 |
+| **Dell Precision 5820 AI/ML Workstation** (NVIDIA RTX A6000) | Workstations | Dell Technologies | ₹4,20,000 |
+| **Oracle Database 19c Enterprise Core License Pack** | Software Licenses | Oracle India | ₹8,50,000 |
+| **Red Hat Enterprise Linux (RHEL) Data Center Subscription** | Software Licenses | Oracle / Partner | ₹1,42,000 |
+| **iTRACE Industrial Rugged Android Barcode Scanner** (TC52x) | iTRACE WMS & IoT | Zebra Technologies | ₹68,000 |
+| **iTRACE Fixed Long-Range RFID Portal Reader** | iTRACE WMS & IoT | Zebra Technologies | ₹1,75,000 |
+| **iHRMS Face & Palm Recognition Biometric Device** | iHRMS Smart Devices | Zebra / Partner | ₹45,000 |
 
 ---
 
 ## 🚀 Getting Started & Installation
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [MySQL Server](https://dev.mysql.com/downloads/mysql/) (v8.0+)
 
 ### 1. Clone the Repository
 ```bash
@@ -116,8 +97,7 @@ git clone https://github.com/bhumika-bindal/Inventory_mngmnt_sys.git
 cd Inventory_mngmnt_sys
 ```
 
-### 2. Configure Environment Variables
-In the `Backend/` directory, create or verify `.env`:
+### 2. Configure Environment (`Backend/.env`)
 ```env
 DB_HOST=localhost
 DB_USER=root
@@ -127,29 +107,18 @@ JWT_SECRET=your_jwt_secret_key
 PORT=3000
 ```
 
-### 3. Install Backend Dependencies
+### 3. Install Backend Dependencies & Seed Data
 ```bash
 cd Backend
 npm install
-```
-
-### 4. Setup Database & Seed Initial Data
-Ensure your MySQL server is running, then run:
-```bash
 npm run seed
 ```
-*(This automatically creates sample categories, suppliers, products, and movements).*
 
-### 5. Launch the Application
+### 4. Start Server
 ```bash
 npm start
 ```
-
-### 6. View in Browser
-Open your web browser and navigate to:
-```
-http://localhost:3000
-```
+Visit **`http://localhost:3000`** in Google Chrome or Microsoft Edge.
 
 ---
 
@@ -157,62 +126,20 @@ http://localhost:3000
 
 | Role | Username | Password |
 |---|---|---|
-| **Administrator** | `admin` | `admin123` |
+| **iONE Administrator** | `admin` | `admin123` |
 
-*(A one-click "Auto-Fill" button is also provided directly on the login page).*
-
----
-
-## 📡 RESTful API Endpoints
-
-### Authentication
-- `POST /api/auth/login` – Authenticate administrator & return signed JWT.
-- `POST /api/auth/register` – Register an administrator.
-
-### Products
-- `GET /api/products` – List products with search & status filters (`?search=&category_id=&supplier_id=&status=`).
-- `GET /api/products/:id` – Retrieve product details by ID.
-- `POST /api/products` – Create a new product.
-- `PUT /api/products/:id` – Update existing product details.
-- `DELETE /api/products/:id` – Delete a product.
-- `GET /api/products/alerts/low` – Fetch all low-stock items.
-
-### Categories
-- `GET /api/categories` – List all categories with product counts.
-- `POST /api/categories` – Add a new category.
-- `PUT /api/categories/:id` – Update category name.
-- `DELETE /api/categories/:id` – Delete category.
-
-### Suppliers
-- `GET /api/suppliers` – List suppliers with contact details and product counts.
-- `POST /api/suppliers` – Register a new supplier.
-- `PUT /api/suppliers/:id` – Update supplier information.
-- `DELETE /api/suppliers/:id` – Remove a supplier.
-
-### Stock Movement Operations
-- `POST /api/stock` – Atomic stock IN (addition) or stock OUT (deduction) movement.
-- `GET /api/stock` – Historical movement audit trail (`?type=&date_from=&date_to=`).
-
-### Dashboard & Analytics
-- `GET /api/dashboard/summary` – High-level KPI summary statistics.
-- `GET /api/dashboard/charts` – Visual trend datasets for Chart.js.
+*(Click "Auto-Fill" on the login screen for 1-click access).*
 
 ---
 
-## 📅 Project Milestones & Deliverables
-
-| Phase | Deliverable | Status |
-|---|---|---|
-| Phase 1: Requirement Gathering & Analysis | `IMS_Requirements.md` (SRS) | ✅ Completed |
-| Phase 2: System Design & ERD | `IMS_System_Design.md`, `IMS_ER_Diagram.md` | ✅ Completed |
-| Phase 3: UI/UX Design & Wireframes | `IMS_UIUX_Design.md` | ✅ Completed |
-| Phase 4: Database Development | `IMS_Schema.sql`, `Backend/seed.js` | ✅ Completed |
-| Phase 5: Backend Development | Node/Express REST APIs with JWT & ACID | ✅ Completed |
-| Phase 6: Frontend Development | Modern responsive UI, Chart.js, CSV export | ✅ Completed |
-| Phase 7: Testing | Postman collections & automated test runs | ⏳ Ready |
-| Phase 8: Documentation | System documentation & README | ✅ Completed |
+## 📄 Deliverable Documentation
+- [`IMS_Requirements.md`](IMS_Requirements.md) – Software Requirements Specification (SRS)
+- [`IMS_System_Design.md`](IMS_System_Design.md) – Enterprise 3-Tier Architecture & DFDs
+- [`IMS_ER_Diagram.md`](IMS_ER_Diagram.md) – Relational Crow's Foot ER Diagram with Mermaid
+- [`IMS_UIUX_Design.md`](IMS_UIUX_Design.md) – UI/UX Wireframes & Visual Tokens
+- [`IMS_Schema.sql`](IMS_Schema.sql) – MySQL Production Schema & Initial Seed Data
 
 ---
 
 ## 📄 License
-This project is open-source under the MIT License.
+Internal enterprise project developed for **iONE IT Solutions Pvt. Ltd.** All rights reserved.

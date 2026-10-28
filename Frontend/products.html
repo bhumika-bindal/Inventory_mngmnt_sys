@@ -15,7 +15,7 @@
       <header class="topbar">
         <div class="topbar-left">
           <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
-          <div class="page-breadcrumb">Catalog / <strong>Products</strong></div>
+          <div class="page-breadcrumb">iONE Infrastructure / <strong>IT Assets & Equipment</strong></div>
         </div>
         <div class="topbar-right">
           <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
@@ -25,11 +25,11 @@
       <div class="content-area">
         <div class="page-header">
           <div class="page-title">
-            <h1>Product Catalog</h1>
-            <p>Manage inventory items, pricing, suppliers, and safety stock thresholds.</p>
+            <h1>Enterprise IT Assets & Equipment</h1>
+            <p>Track server hardware, networking, developer laptops, and enterprise software licenses.</p>
           </div>
-          <button class="btn-primary" style="width:auto; padding:10px 18px;" onclick="openAddModal()">
-            <span>+ Add New Product</span>
+          <button class="btn-primary" style="width:auto; padding:10px 18px; background:#1d4ed8;" onclick="openAddModal()">
+            <span>+ Add Enterprise Asset</span>
           </button>
         </div>
 
@@ -37,22 +37,22 @@
         <div class="toolbar">
           <div class="search-input-wrap">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Search by product name, category, or supplier..." oninput="handleSearch()">
+            <input type="text" id="searchInput" placeholder="Search assets by name, domain, or OEM partner..." oninput="handleSearch()">
           </div>
 
           <select class="filter-select" id="categoryFilter" onchange="loadProducts()">
-            <option value="">All Categories</option>
+            <option value="">All Technology Domains</option>
           </select>
 
           <select class="filter-select" id="supplierFilter" onchange="loadProducts()">
-            <option value="">All Suppliers</option>
+            <option value="">All OEM Partners</option>
           </select>
 
           <select class="filter-select" id="statusFilter" onchange="loadProducts()">
             <option value="">All Stock Levels</option>
             <option value="in_stock">In Stock (> Limit)</option>
             <option value="low_stock">Low Stock (≤ Limit)</option>
-            <option value="out_of_stock">Out of Stock (0)</option>
+            <option value="out_of_stock">Depleted (0)</option>
           </select>
 
           <button class="btn-secondary" onclick="resetFilters()">Reset</button>

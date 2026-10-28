@@ -3,41 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - IMS Inventory Management System</title>
+  <title>iONE IT Solutions - Enterprise Asset & Inventory System</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="login-body">
 
   <div class="login-wrapper">
     <!-- Left Banner -->
-    <div class="login-banner">
+    <div class="login-banner" style="background: linear-gradient(135deg, #0f2b48 0%, #1e40af 100%);">
       <div class="login-banner-content">
-        <div style="font-size: 36px; margin-bottom: 12px;">📦</div>
-        <h2>Inventory Management System</h2>
-        <p>Enterprise stock tracking, ACID movement logs, vendor interactions, and real-time low-stock alerting.</p>
+        <div style="font-size: 24px; font-weight:800; letter-spacing:1px; color:#60a5fa; margin-bottom: 6px;">iONE IT SOLUTIONS</div>
+        <h2>Engineering Digital Nations.<br><span style="font-size:18px; font-weight:400; color:rgba(255,255,255,0.85);">Since 2009.</span></h2>
+        <p>Enterprise Asset & Inventory Management System for mission-critical Cloud, ERP, AI, Cybersecurity, and Managed Services infrastructure.</p>
         
         <ul class="login-features">
-          <li><span>✓</span> Real-Time Stock Tracking & Movement History</li>
-          <li><span>✓</span> Automated Low-Stock Alert Intelligence</li>
-          <li><span>✓</span> Supplier & Category Relationship Management</li>
-          <li><span>✓</span> Instant CSV Audit Reports & Analytics</li>
+          <li><span>✓</span> 15+ Years Enterprise IT & 500+ Projects Delivered</li>
+          <li><span>✓</span> Mission-Critical Infrastructure for Governments & PSUs</li>
+          <li><span>✓</span> Proprietary Platforms: iTRACE WMS, iHRMS & Anumati</li>
+          <li><span>✓</span> ISO 27001:2022, ISO 9001:2015 & CMMI Level 3 Certified</li>
         </ul>
       </div>
 
       <div style="font-size: 12px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.15); padding-top: 16px;">
-        Designed & Built by <strong>Bhumika</strong> | Intern Project
+        Designed & Built by <strong>Bhumika</strong> | Intern Project under <strong>Anshul Dogra</strong>
       </div>
     </div>
 
     <!-- Right Login Form -->
     <div class="login-form-side">
-      <div class="brand-badge">Administrative Portal</div>
-      <h1>Welcome Back</h1>
-      <p class="subtitle">Please enter your credentials to access the inventory system.</p>
+      <div class="brand-badge" style="background:#eff6ff; color:#1d4ed8;">iONE Enterprise Portal</div>
+      <h1>Sign In</h1>
+      <p class="subtitle">Access iONE IT Solutions internal asset and inventory control.</p>
 
       <form id="loginForm">
         <div class="form-group">
-          <label for="username">Username</label>
+          <label for="username">Corporate Username</label>
           <input type="text" id="username" placeholder="e.g. admin" required autocomplete="username">
         </div>
 
@@ -46,8 +46,8 @@
           <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
         </div>
 
-        <button type="submit" id="submitBtn" class="btn-primary" style="margin-top: 10px;">
-          <span>Sign In to Dashboard</span>
+        <button type="submit" id="submitBtn" class="btn-primary" style="margin-top: 10px; background:#1d4ed8;">
+          <span>Sign In to iONE Dashboard</span>
           <span>→</span>
         </button>
       </form>
@@ -64,14 +64,12 @@
 
   <script src="js/api.js"></script>
   <script>
-    // Auto-fill demo credentials
     function fillDemoCredentials() {
       document.getElementById('username').value = 'admin';
       document.getElementById('password').value = 'admin123';
       showToast('Demo credentials entered! Click Sign In.', 'info');
     }
 
-    // Handle Login submission
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const usernameInput = document.getElementById('username');
@@ -93,29 +91,27 @@
         const data = await res.json();
 
         if (!res.ok) {
-          showToast(data.error || 'Invalid username or password.', 'error');
+          showToast(data.error || 'Invalid credentials.', 'error');
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span>Sign In to Dashboard</span> <span>→</span>';
+          submitBtn.innerHTML = '<span>Sign In to iONE Dashboard</span> <span>→</span>';
           return;
         }
 
-        // Store JWT token and username
         localStorage.setItem('ims_token', data.token);
         localStorage.setItem('ims_user', username);
-        showToast('Login successful! Redirecting...', 'success');
+        showToast('Authentication verified! Redirecting to iONE Portal...', 'success');
 
         setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 600);
+        }, 500);
 
       } catch (err) {
         showToast('Server not reachable. Please check if backend is running.', 'error');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Sign In to Dashboard</span> <span>→</span>';
+        submitBtn.innerHTML = '<span>Sign In to iONE Dashboard</span> <span>→</span>';
       }
     });
 
-    // If already logged in, redirect to dashboard
     if (getToken()) {
       window.location.href = 'dashboard.html';
     }
