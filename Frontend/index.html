@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - IMS Inventory Management System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-body">
+
+  <div class="login-wrapper">
+    <!-- Left Banner -->
+    <div class="login-banner">
+      <div class="login-banner-content">
+        <div style="font-size: 36px; margin-bottom: 12px;">📦</div>
+        <h2>Inventory Management System</h2>
+        <p>Enterprise stock tracking, ACID movement logs, vendor interactions, and real-time low-stock alerting.</p>
+        
+        <ul class="login-features">
+          <li><span>✓</span> Real-Time Stock Tracking & Movement History</li>
+          <li><span>✓</span> Automated Low-Stock Alert Intelligence</li>
+          <li><span>✓</span> Supplier & Category Relationship Management</li>
+          <li><span>✓</span> Instant CSV Audit Reports & Analytics</li>
+        </ul>
+      </div>
+
+      <div style="font-size: 12px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.15); padding-top: 16px;">
+        Designed & Built by <strong>Bhumika</strong> | Intern Project
+      </div>
+    </div>
+
+    <!-- Right Login Form -->
+    <div class="login-form-side">
+      <div class="brand-badge">Administrative Portal</div>
+      <h1>Welcome Back</h1>
+      <p class="subtitle">Please enter your credentials to access the inventory system.</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="e.g. admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-primary" style="margin-top: 10px;">
+          <span>Sign In to Dashboard</span>
+          <span>→</span>
+        </button>
+      </form>
+
+      <!-- Demo Credentials Helper -->
+      <div class="demo-chip">
+        <div>
+          <strong>Demo Login:</strong> <code>admin</code> / <code>admin123</code>
+        </div>
+        <button type="button" class="demo-chip-btn" onclick="fillDemoCredentials()">Auto-Fill</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Auto-fill demo credentials
+    function fillDemoCredentials() {
+      document.getElementById('username').value = 'admin';
+      document.getElementById('password').value = 'admin123';
+      showToast('Demo credentials entered! Click Sign In.', 'info');
+    }
+
+    // Handle Login submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = document.getElementById('submitBtn');
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Verifying credentials...</span>';
+
+      try {
+        const res = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showToast(data.error || 'Invalid username or password.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Sign In to Dashboard</span> <span>→</span>';
+          return;
+        }
+
+        // Store JWT token and username
+        localStorage.setItem('ims_token', data.token);
+        localStorage.setItem('ims_user', username);
+        showToast('Login successful! Redirecting...', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 600);
+
+      } catch (err) {
+        showToast('Server not reachable. Please check if backend is running.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Sign In to Dashboard</span> <span>→</span>';
+      }
+    });
+
+    // If already logged in, redirect to dashboard
+    if (getToken()) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

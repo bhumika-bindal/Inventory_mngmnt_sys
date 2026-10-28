@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Operations - IMS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <div id="sidebar-mount"></div>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
+          <div class="page-breadcrumb">Operations / <strong>Stock In & Out</strong></div>
+        </div>
+        <div class="topbar-right">
+          <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="page-header">
+          <div class="page-title">
+            <h1>Stock Movement Engine</h1>
+            <p>Execute atomic inventory restock (IN) and distribution issue (OUT) transactions.</p>
+          </div>
+        </div>
+
+        <!-- Transaction Entry Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Record Stock Transaction</h2>
+            <span class="pill pill-primary">ACID Compliant</span>
+          </div>
+          <div class="card-body">
+            <form id="stockForm">
+              <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap:16px; margin-bottom:16px;">
+                <div class="form-group">
+                  <label for="sProduct">Select Inventory Product *</label>
+                  <select id="sProduct" required onchange="handleProductSelect()">
+                    <option value="">-- Choose Product --</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="sType">Movement Type *</label>
+                  <select id="sType" required onchange="updateStockPreview()">
+                    <option value="IN">Stock IN (Procurement / Restock)</option>
+                    <option value="OUT">Stock OUT (Sales / Issue)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="sQty">Quantity (Units) *</label>
+                  <input type="number" id="sQty" min="1" value="10" required oninput="updateStockPreview()">
+                </div>
+              </div>
+
+              <!-- Live Projected Stock Preview Banner -->
+              <div id="stockPreviewBanner" style="padding:12px 16px; background:var(--slate-50); border:1px solid var(--border-color); border-radius:var(--radius-md); margin-bottom:16px; font-size:13.5px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                  <span style="color:var(--slate-500);">Current Stock:</span> <strong id="previewCurrentQty">--</strong>
+                  <span style="margin: 0 10px; color:var(--slate-400);">➔</span>
+                  <span style="color:var(--slate-500);">Projected After Movement:</span> <strong id="previewProjectedQty" style="color:var(--primary);">--</strong>
+                </div>
+                <div id="previewStatusBadge"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="sNote">Transaction Notes / Reference (Optional)</label>
+                <input type="text" id="sNote" placeholder="e.g. PO #4928 received from vendor or distributed to regional branch">
+              </div>
+
+              <button type="submit" class="btn-primary" style="width:auto; padding:12px 24px; margin-top:8px;">
+                <span>Record Movement</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Movement History Table Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Recent Transaction Ledger</h2>
+            <div style="display:flex; gap:10px;">
+              <select class="filter-select" id="ledgerTypeFilter" onchange="loadMovements()">
+                <option value="">All Movement Types</option>
+                <option value="IN">Only Stock IN</option>
+                <option value="OUT">Only Stock OUT</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Movement ID</th>
+                  <th>Product</th>
+                  <th>Movement Type</th>
+                  <th>Units</th>
+                  <th>Transaction Notes / Reference</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="stockBody">
+                <tr><td colspan="6" style="text-align:center; padding:24px; color:var(--slate-500);">Loading movement ledger...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireAuth();
+    renderAppShell('Stock Ops');
+
+    let productsList = [];
+
+    async function loadProductsDropdown() {
+      const res = await apiFetch('/products');
+      if (!res || !res.ok) return;
+      productsList = res.data;
+      const select = document.getElementById('sProduct');
+      select.innerHTML = '<option value="">-- Choose Product --</option>' +
+        productsList.map(p => `<option value="${p.id}" data-qty="${p.quantity}">${p.name} (On-hand: ${p.quantity})</option>`).join('');
+    }
+
+    function handleProductSelect() {
+      updateStockPreview();
+    }
+
+    function updateStockPreview() {
+      const select = document.getElementById('sProduct');
+      const selectedOption = select.options[select.selectedIndex];
+      const type = document.getElementById('sType').value;
+      const qtyInput = document.getElementById('sQty');
+      const qty = parseInt(qtyInput.value, 10) || 0;
+
+      if (!selectedOption || !selectedOption.value) {
+        document.getElementById('previewCurrentQty').textContent = '--';
+        document.getElementById('previewProjectedQty').textContent = '--';
+        document.getElementById('previewStatusBadge').innerHTML = '';
+        return;
+      }
+
+      const currentQty = parseInt(selectedOption.getAttribute('data-qty'), 10) || 0;
+      document.getElementById('previewCurrentQty').textContent = `${currentQty} units`;
+
+      let projected = type === 'IN' ? currentQty + qty : currentQty - qty;
+      const badge = document.getElementById('previewStatusBadge');
+
+      if (type === 'OUT' && currentQty < qty) {
+        document.getElementById('previewProjectedQty').textContent = `Negative (${projected}) - Insufficient!`;
+        document.getElementById('previewProjectedQty').style.color = 'var(--danger)';
+        badge.innerHTML = '<span class="pill pill-danger">⚠️ Insufficient Stock</span>';
+      } else {
+        document.getElementById('previewProjectedQty').textContent = `${projected} units`;
+        document.getElementById('previewProjectedQty').style.color = type === 'IN' ? 'var(--success)' : 'var(--slate-900)';
+        badge.innerHTML = type === 'IN' 
+          ? '<span class="pill pill-success">+ Stock Addition</span>' 
+          : '<span class="pill pill-warning">- Stock Deduction</span>';
+      }
+    }
+
+    async function loadMovements() {
+      const typeFilter = document.getElementById('ledgerTypeFilter').value;
+      const endpoint = typeFilter ? `/stock?type=${typeFilter}` : '/stock';
+
+      const res = await apiFetch(endpoint);
+      const tbody = document.getElementById('stockBody');
+
+      if (!res || !res.ok) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--danger);">Failed to load movements.</td></tr>';
+        return;
+      }
+
+      if (res.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--slate-500);">No movements recorded yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = res.data.map(m => `
+        <tr>
+          <td><strong>#${m.id}</strong></td>
+          <td><strong>${m.product_name || `Product #${m.product_id}`}</strong></td>
+          <td>
+            <span class="pill ${m.type === 'IN' ? 'pill-success' : 'pill-danger'}">
+              ${m.type === 'IN' ? '▲ IN (Restock)' : '▼ OUT (Issued)'}
+            </span>
+          </td>
+          <td><strong>${m.quantity}</strong> units</td>
+          <td>${m.note || '<span style="color:var(--slate-400);">-</span>'}</td>
+          <td>${new Date(m.date).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('stockForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const productId = parseInt(document.getElementById('sProduct').value, 10);
+      const type = document.getElementById('sType').value;
+      const quantity = parseInt(document.getElementById('sQty').value, 10);
+      const note = document.getElementById('sNote').value.trim();
+
+      const res = await apiFetch('/stock', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: productId, type, quantity, note })
+      });
+
+      if (res && res.ok) {
+        showToast(res.data.message || 'Movement recorded successfully!', 'success');
+        document.getElementById('stockForm').reset();
+        await loadProductsDropdown();
+        updateStockPreview();
+        loadMovements();
+        updateAlertBadge();
+      } else {
+        showToast(res.data.error || 'Failed to record movement.', 'error');
+      }
+    });
+
+    loadProductsDropdown();
+    loadMovements();
+  </script>
+</body>
+</html>

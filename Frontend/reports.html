@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Reports - IMS</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    @media print {
+      .sidebar, .topbar, .toolbar, .action-btns, .btn-primary, .btn-secondary {
+        display: none !important;
+      }
+      .content-area {
+        padding: 0;
+        margin: 0;
+      }
+      .card {
+        border: none;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div id="sidebar-mount"></div>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
+          <div class="page-breadcrumb">Analytics / <strong>Audit Reports</strong></div>
+        </div>
+        <div class="topbar-right">
+          <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="page-header">
+          <div class="page-title">
+            <h1>Stock Movement & Audit Reports</h1>
+            <p>Chronological transaction trail, volumetric summaries, and CSV data export.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-secondary" onclick="window.print()">
+              <span>🖨️ Print Report</span>
+            </button>
+            <button class="btn-primary" style="width:auto; padding:10px 18px;" onclick="exportCSV()">
+              <span>⬇️ Export to CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric Summary Chips -->
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="stat-card">
+            <div class="stat-icon success">▲</div>
+            <div class="stat-details">
+              <div class="stat-label">Total Inbound (IN)</div>
+              <div class="stat-value" id="summaryInUnits">0</div>
+              <div class="stat-sub">Replenished stock units</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon warning">▼</div>
+            <div class="stat-details">
+              <div class="stat-label">Total Outbound (OUT)</div>
+              <div class="stat-value" id="summaryOutUnits">0</div>
+              <div class="stat-sub">Issued / sold units</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon primary">⚖️</div>
+            <div class="stat-details">
+              <div class="stat-label">Net Inventory Change</div>
+              <div class="stat-value" id="summaryNetUnits">0</div>
+              <div class="stat-sub">Net volumetric balance</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="toolbar">
+          <div class="form-group" style="margin:0; flex:1; min-width:180px;">
+            <input type="date" id="dateFrom" class="filter-select" onchange="loadReport()" style="width:100%;">
+          </div>
+
+          <div class="form-group" style="margin:0; flex:1; min-width:180px;">
+            <input type="date" id="dateTo" class="filter-select" onchange="loadReport()" style="width:100%;">
+          </div>
+
+          <select class="filter-select" id="typeFilter" onchange="loadReport()">
+            <option value="">All Movement Types</option>
+            <option value="IN">Only Stock IN</option>
+            <option value="OUT">Only Stock OUT</option>
+          </select>
+
+          <button class="btn-secondary" onclick="resetReportFilters()">Clear Filters</button>
+        </div>
+
+        <!-- Report Data Table Card -->
+        <div class="card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Audit ID</th>
+                  <th>Timestamp</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Movement Type</th>
+                  <th>Quantity</th>
+                  <th>Reference / Note</th>
+                </tr>
+              </thead>
+              <tbody id="reportBody">
+                <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--slate-500);">Generating audit trail...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireAuth();
+    renderAppShell('Reports');
+
+    let currentReportData = [];
+
+    async function loadReport() {
+      const dateFrom = document.getElementById('dateFrom').value;
+      const dateTo = document.getElementById('dateTo').value;
+      const type = document.getElementById('typeFilter').value;
+
+      const params = new URLSearchParams();
+      if (dateFrom) params.append('date_from', dateFrom);
+      if (dateTo) params.append('date_to', dateTo);
+      if (type) params.append('type', type);
+
+      const res = await apiFetch(`/stock?${params.toString()}`);
+      const tbody = document.getElementById('reportBody');
+
+      if (!res || !res.ok) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--danger);">Failed to load audit trail.</td></tr>';
+        return;
+      }
+
+      currentReportData = res.data;
+
+      // Update Summary metrics
+      let inUnits = 0;
+      let outUnits = 0;
+      currentReportData.forEach(m => {
+        if (m.type === 'IN') inUnits += m.quantity;
+        if (m.type === 'OUT') outUnits += m.quantity;
+      });
+
+      document.getElementById('summaryInUnits').textContent = `+${inUnits.toLocaleString()}`;
+      document.getElementById('summaryOutUnits').textContent = `-${outUnits.toLocaleString()}`;
+      const net = inUnits - outUnits;
+      document.getElementById('summaryNetUnits').textContent = `${net >= 0 ? '+' : ''}${net.toLocaleString()}`;
+      document.getElementById('summaryNetUnits').style.color = net >= 0 ? 'var(--success)' : 'var(--danger)';
+
+      if (currentReportData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--slate-500);">No movement records found for the selected period.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = currentReportData.map(m => `
+        <tr>
+          <td><strong>#${m.id}</strong></td>
+          <td>${new Date(m.date).toLocaleString()}</td>
+          <td><strong>${m.product_name || `Product #${m.product_id}`}</strong></td>
+          <td><span class="pill pill-neutral">${m.category || 'Unassigned'}</span></td>
+          <td>
+            <span class="pill ${m.type === 'IN' ? 'pill-success' : 'pill-danger'}">
+              ${m.type === 'IN' ? '▲ IN' : '▼ OUT'}
+            </span>
+          </td>
+          <td><strong>${m.quantity}</strong> units</td>
+          <td>${m.note || '<span style="color:var(--slate-400);">-</span>'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function resetReportFilters() {
+      document.getElementById('dateFrom').value = '';
+      document.getElementById('dateTo').value = '';
+      document.getElementById('typeFilter').value = '';
+      loadReport();
+    }
+
+    // Export current filtered dataset to CSV
+    function exportCSV() {
+      if (!currentReportData || currentReportData.length === 0) {
+        showToast('No data available to export.', 'warning');
+        return;
+      }
+
+      const headers = ['Audit ID', 'Timestamp', 'Product Name', 'Category', 'Movement Type', 'Quantity', 'Note'];
+      const rows = currentReportData.map(m => [
+        m.id,
+        `"${new Date(m.date).toLocaleString()}"`,
+        `"${(m.product_name || '').replace(/"/g, '""')}"`,
+        `"${(m.category || '').replace(/"/g, '""')}"`,
+        m.type,
+        m.quantity,
+        `"${(m.note || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `IMS_Stock_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('CSV report generated and downloaded!', 'success');
+    }
+
+    loadReport();
+  </script>
+</body>
+</html>

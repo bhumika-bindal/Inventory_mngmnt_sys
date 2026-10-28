@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products Catalog - IMS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <div id="sidebar-mount"></div>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
+          <div class="page-breadcrumb">Catalog / <strong>Products</strong></div>
+        </div>
+        <div class="topbar-right">
+          <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="page-header">
+          <div class="page-title">
+            <h1>Product Catalog</h1>
+            <p>Manage inventory items, pricing, suppliers, and safety stock thresholds.</p>
+          </div>
+          <button class="btn-primary" style="width:auto; padding:10px 18px;" onclick="openAddModal()">
+            <span>+ Add New Product</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="toolbar">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search by product name, category, or supplier..." oninput="handleSearch()">
+          </div>
+
+          <select class="filter-select" id="categoryFilter" onchange="loadProducts()">
+            <option value="">All Categories</option>
+          </select>
+
+          <select class="filter-select" id="supplierFilter" onchange="loadProducts()">
+            <option value="">All Suppliers</option>
+          </select>
+
+          <select class="filter-select" id="statusFilter" onchange="loadProducts()">
+            <option value="">All Stock Levels</option>
+            <option value="in_stock">In Stock (> Limit)</option>
+            <option value="low_stock">Low Stock (≤ Limit)</option>
+            <option value="out_of_stock">Out of Stock (0)</option>
+          </select>
+
+          <button class="btn-secondary" onclick="resetFilters()">Reset</button>
+        </div>
+
+        <!-- Products Data Table Card -->
+        <div class="card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Supplier</th>
+                  <th>Unit Price</th>
+                  <th>Stock Quantity</th>
+                  <th>Threshold</th>
+                  <th>Stock Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsBody">
+                <tr><td colspan="9" style="text-align:center; padding:24px; color:var(--slate-500);">Loading products catalog...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add / Edit Product Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New Product</h3>
+        <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+      </div>
+      <form id="productForm">
+        <div class="modal-body">
+          <input type="hidden" id="editProductId">
+
+          <div class="form-group">
+            <label for="pName">Product Name *</label>
+            <input type="text" id="pName" placeholder="e.g. Ergonomic Office Chair" required>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="form-group">
+              <label for="pCategory">Category</label>
+              <select id="pCategory">
+                <option value="">Select Category</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pSupplier">Supplier</label>
+              <select id="pSupplier">
+                <option value="">Select Supplier</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+            <div class="form-group">
+              <label for="pPrice">Unit Price (₹) *</label>
+              <input type="number" id="pPrice" step="0.01" min="0" placeholder="0.00" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pQty">Initial Quantity</label>
+              <input type="number" id="pQty" min="0" value="0">
+            </div>
+
+            <div class="form-group">
+              <label for="pLimit">Low Stock Limit</label>
+              <input type="number" id="pLimit" min="0" value="5">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+          <button type="submit" class="btn-primary" style="width:auto;" id="saveBtn">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireAuth();
+    renderAppShell('Products');
+
+    let allProducts = [];
+    let categoriesList = [];
+    let suppliersList = [];
+
+    // Check URL parameters for direct filters (e.g. products.html?filter=low)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('filter') === 'low') {
+      document.getElementById('statusFilter').value = 'low_stock';
+    }
+
+    // Load initial dropdown options (Categories & Suppliers)
+    async function loadMetaFilters() {
+      const [catsRes, supsRes] = await Promise.all([
+        apiFetch('/categories'),
+        apiFetch('/suppliers')
+      ]);
+
+      if (catsRes && catsRes.ok) {
+        categoriesList = catsRes.data;
+        const catFilter = document.getElementById('categoryFilter');
+        const modalCat = document.getElementById('pCategory');
+        catFilter.innerHTML = '<option value="">All Categories</option>' + 
+          categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        modalCat.innerHTML = '<option value="">Select Category</option>' + 
+          categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+
+      if (supsRes && supsRes.ok) {
+        suppliersList = supsRes.data;
+        const supFilter = document.getElementById('supplierFilter');
+        const modalSup = document.getElementById('pSupplier');
+        supFilter.innerHTML = '<option value="">All Suppliers</option>' + 
+          suppliersList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        modalSup.innerHTML = '<option value="">Select Supplier</option>' + 
+          suppliersList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      }
+    }
+
+    // Load Products with filters
+    async function loadProducts() {
+      const search = document.getElementById('searchInput').value.trim();
+      const category_id = document.getElementById('categoryFilter').value;
+      const supplier_id = document.getElementById('supplierFilter').value;
+      const status = document.getElementById('statusFilter').value;
+
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (category_id) params.append('category_id', category_id);
+      if (supplier_id) params.append('supplier_id', supplier_id);
+      if (status) params.append('status', status);
+
+      const res = await apiFetch(`/products?${params.toString()}`);
+      const tbody = document.getElementById('productsBody');
+
+      if (!res || !res.ok) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--danger);">Failed to load products.</td></tr>';
+        return;
+      }
+
+      allProducts = res.data;
+
+      if (allProducts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:32px; color:var(--slate-500);">No products match the selected criteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = allProducts.map(p => {
+        let statusBadge = '';
+        if (p.quantity === 0) {
+          statusBadge = '<span class="pill pill-danger">Out of Stock</span>';
+        } else if (p.quantity <= p.low_stock_limit) {
+          statusBadge = '<span class="pill pill-warning">Low Stock</span>';
+        } else {
+          statusBadge = '<span class="pill pill-success">In Stock</span>';
+        }
+
+        return `
+          <tr>
+            <td><strong>#${p.id}</strong></td>
+            <td><strong>${p.name}</strong></td>
+            <td><span class="pill pill-neutral">${p.category || 'Unassigned'}</span></td>
+            <td>${p.supplier || 'Unassigned'}</td>
+            <td>₹${Number(p.price).toFixed(2)}</td>
+            <td><strong>${p.quantity}</strong></td>
+            <td>${p.low_stock_limit}</td>
+            <td>${statusBadge}</td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-sm btn-sm-edit" onclick="openEditModal(${p.id})">Edit</button>
+                <button class="btn-sm btn-sm-del" onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    let searchTimeout = null;
+    function handleSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => { loadProducts(); }, 250);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('categoryFilter').value = '';
+      document.getElementById('supplierFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      loadProducts();
+    }
+
+    // Open Modal for Add
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add New Product';
+      document.getElementById('editProductId').value = '';
+      document.getElementById('productForm').reset();
+      document.getElementById('pQty').disabled = false;
+      openModal('productModal');
+    }
+
+    // Open Modal for Edit
+    function openEditModal(id) {
+      const p = allProducts.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('modalTitle').textContent = 'Edit Product';
+      document.getElementById('editProductId').value = p.id;
+      document.getElementById('pName').value = p.name;
+      document.getElementById('pCategory').value = p.category_id || '';
+      document.getElementById('pSupplier').value = p.supplier_id || '';
+      document.getElementById('pPrice').value = p.price;
+      document.getElementById('pQty').value = p.quantity;
+      document.getElementById('pLimit').value = p.low_stock_limit;
+
+      openModal('productModal');
+    }
+
+    // Save (Create / Update)
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById('editProductId').value;
+
+      const payload = {
+        name: document.getElementById('pName').value.trim(),
+        category_id: document.getElementById('pCategory').value || null,
+        supplier_id: document.getElementById('pSupplier').value || null,
+        price: parseFloat(document.getElementById('pPrice').value),
+        quantity: parseInt(document.getElementById('pQty').value, 10) || 0,
+        low_stock_limit: parseInt(document.getElementById('pLimit').value, 10) || 5
+      };
+
+      const method = editId ? 'PUT' : 'POST';
+      const endpoint = editId ? `/products/${editId}` : '/products';
+
+      const res = await apiFetch(endpoint, {
+        method,
+        body: JSON.stringify(payload)
+      });
+
+      if (res && res.ok) {
+        showToast(`Product ${editId ? 'updated' : 'created'} successfully!`, 'success');
+        closeModal('productModal');
+        loadProducts();
+        updateAlertBadge();
+      } else {
+        showToast(res.data.error || 'Failed to save product.', 'error');
+      }
+    });
+
+    // Delete Product
+    async function deleteProduct(id, name) {
+      if (!confirm(`Are you sure you want to permanently delete "${name}"?`)) {
+        return;
+      }
+
+      const res = await apiFetch(`/products/${id}`, { method: 'DELETE' });
+      if (res && res.ok) {
+        showToast('Product deleted successfully.', 'success');
+        loadProducts();
+        updateAlertBadge();
+      } else {
+        showToast(res.data.error || 'Failed to delete product.', 'error');
+      }
+    }
+
+    // Initialize
+    async function init() {
+      await loadMetaFilters();
+      await loadProducts();
+    }
+    init();
+  </script>
+</body>
+</html>

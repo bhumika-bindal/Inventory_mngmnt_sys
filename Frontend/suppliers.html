@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppliers Directory - IMS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <div id="sidebar-mount"></div>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
+          <div class="page-breadcrumb">Directory / <strong>Suppliers</strong></div>
+        </div>
+        <div class="topbar-right">
+          <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="page-header">
+          <div class="page-title">
+            <h1>Supplier Directory</h1>
+            <p>Manage vendors, distributor contact points, and procurement channels.</p>
+          </div>
+          <button class="btn-primary" style="width:auto; padding:10px 18px;" onclick="openAddSupplierModal()">
+            <span>+ Add New Supplier</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Vendor / Company Name</th>
+                  <th>Contact Phone</th>
+                  <th>Email Address</th>
+                  <th>Location / Address</th>
+                  <th>Supplied Items</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="suppliersBody">
+                <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--slate-500);">Loading suppliers directory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add / Edit Supplier Modal -->
+  <div class="modal-overlay" id="supplierModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="supModalTitle">Add Supplier</h3>
+        <button class="modal-close" onclick="closeModal('supplierModal')">✕</button>
+      </div>
+      <form id="supplierForm">
+        <div class="modal-body">
+          <input type="hidden" id="editSupId">
+
+          <div class="form-group">
+            <label for="sName">Company / Supplier Name *</label>
+            <input type="text" id="sName" placeholder="e.g. Apex Industrial Supplies" required>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="form-group">
+              <label for="sPhone">Phone Number</label>
+              <input type="text" id="sPhone" placeholder="+91 98765 43210">
+            </div>
+
+            <div class="form-group">
+              <label for="sEmail">Email Address</label>
+              <input type="email" id="sEmail" placeholder="orders@vendor.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="sAddress">Physical Address / City</label>
+            <textarea id="sAddress" rows="2" placeholder="Facility location, street address..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('supplierModal')">Cancel</button>
+          <button type="submit" class="btn-primary" style="width:auto;">Save Supplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireAuth();
+    renderAppShell('Suppliers');
+
+    let allSuppliers = [];
+
+    async function loadSuppliers() {
+      const res = await apiFetch('/suppliers');
+      const tbody = document.getElementById('suppliersBody');
+
+      if (!res || !res.ok) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--danger);">Failed to load suppliers.</td></tr>';
+        return;
+      }
+
+      allSuppliers = res.data;
+
+      if (allSuppliers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--slate-500);">No suppliers registered yet. Click "+ Add New Supplier" to create one.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = allSuppliers.map(s => `
+        <tr>
+          <td><strong>#${s.id}</strong></td>
+          <td><strong>${s.name}</strong></td>
+          <td>${s.phone ? `<a href="tel:${s.phone}" style="color:var(--primary);text-decoration:none;">${s.phone}</a>` : '<span style="color:var(--slate-400);">-</span>'}</td>
+          <td>${s.email ? `<a href="mailto:${s.email}" style="color:var(--primary);text-decoration:none;">${s.email}</a>` : '<span style="color:var(--slate-400);">-</span>'}</td>
+          <td>${s.address || '<span style="color:var(--slate-400);">-</span>'}</td>
+          <td>
+            <span class="pill pill-info">${s.product_count || 0} Products</span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-sm btn-sm-edit" onclick="openEditSupModal(${s.id})">Edit</button>
+              <button class="btn-sm btn-sm-del" onclick="deleteSupplier(${s.id}, '${s.name.replace(/'/g, "\\'")}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openAddSupplierModal() {
+      document.getElementById('supModalTitle').textContent = 'Add New Supplier';
+      document.getElementById('editSupId').value = '';
+      document.getElementById('supplierForm').reset();
+      openModal('supplierModal');
+    }
+
+    function openEditSupModal(id) {
+      const s = allSuppliers.find(item => item.id === id);
+      if (!s) return;
+
+      document.getElementById('supModalTitle').textContent = 'Edit Supplier';
+      document.getElementById('editSupId').value = s.id;
+      document.getElementById('sName').value = s.name;
+      document.getElementById('sPhone').value = s.phone || '';
+      document.getElementById('sEmail').value = s.email || '';
+      document.getElementById('sAddress').value = s.address || '';
+      openModal('supplierModal');
+    }
+
+    document.getElementById('supplierForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editSupId').value;
+
+      const payload = {
+        name: document.getElementById('sName').value.trim(),
+        phone: document.getElementById('sPhone').value.trim() || null,
+        email: document.getElementById('sEmail').value.trim() || null,
+        address: document.getElementById('sAddress').value.trim() || null
+      };
+
+      const method = id ? 'PUT' : 'POST';
+      const endpoint = id ? `/suppliers/${id}` : '/suppliers';
+
+      const res = await apiFetch(endpoint, {
+        method,
+        body: JSON.stringify(payload)
+      });
+
+      if (res && res.ok) {
+        showToast(`Supplier ${id ? 'updated' : 'created'} successfully!`, 'success');
+        closeModal('supplierModal');
+        loadSuppliers();
+      } else {
+        showToast(res.data.error || 'Failed to save supplier.', 'error');
+      }
+    });
+
+    async function deleteSupplier(id, name) {
+      if (!confirm(`Are you sure you want to delete supplier "${name}"? Product records will remain intact.`)) {
+        return;
+      }
+
+      const res = await apiFetch(`/suppliers/${id}`, { method: 'DELETE' });
+      if (res && res.ok) {
+        showToast('Supplier deleted successfully.', 'success');
+        loadSuppliers();
+      } else {
+        showToast(res.data.error || 'Failed to delete supplier.', 'error');
+      }
+    }
+
+    loadSuppliers();
+  </script>
+</body>
+</html>
