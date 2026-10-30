@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audit Reports - IMS</title>
+  <title>Reports - iONE IMS</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     @media print {
-      .sidebar, .topbar, .toolbar, .action-btns, .btn-primary, .btn-secondary {
+      .sidebar, .topbar, .toolbar-wrap, .btn-action-group, .btn-primary, .btn-secondary {
         display: none !important;
       }
       .content-area {
@@ -29,72 +29,80 @@
     <main class="main-shell">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
-          <div class="page-breadcrumb">Analytics / <strong>Asset Deployment & Audit Reports</strong></div>
+          <button class="mobile-toggle-btn" onclick="toggleMobileMenu()">☰</button>
+          <div class="breadcrumb">Analytics / <strong>Reports</strong></div>
         </div>
         <div class="topbar-right">
-          <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
+          <a href="products.html?filter=low" id="lowStockPill" class="alert-badge-link" style="display:none;"></a>
         </div>
       </header>
 
       <div class="content-area">
         <div class="page-header">
           <div class="page-title">
-            <h1>iONE Asset Deployment & Audit Reports</h1>
-            <p>Chronological hardware allocation history, procurement logs, and client deployment audit export.</p>
+            <h1>Stock Movement Report</h1>
+            <p>Complete historical log of inventory additions, dispatches, and audit entries.</p>
           </div>
           <div style="display:flex; gap:10px;">
             <button class="btn-secondary" onclick="window.print()">
-              <span>🖨️ Print Report</span>
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z"/></svg>
+              <span>Print</span>
             </button>
-            <button class="btn-primary" style="width:auto; padding:10px 18px; background:#1d4ed8;" onclick="exportCSV()">
-              <span>⬇️ Export to CSV</span>
+            <button class="btn-primary" onclick="exportCSV()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>Export CSV</span>
             </button>
           </div>
         </div>
 
-        <!-- Metric Summary Chips -->
-        <div class="stats-grid" style="margin-bottom:20px;">
+        <!-- Metric Summary Cards -->
+        <div class="stats-grid" style="margin-bottom:18px;">
           <div class="stat-card">
-            <div class="stat-icon success">▲</div>
-            <div class="stat-details">
+            <div class="stat-icon-wrap green">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+            </div>
+            <div class="stat-info">
               <div class="stat-label">Total Inbound (IN)</div>
-              <div class="stat-value" id="summaryInUnits">0</div>
-              <div class="stat-sub">Replenished stock units</div>
+              <div class="stat-number" id="summaryInUnits">0</div>
+              <div class="stat-subtext">Received items</div>
             </div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-icon warning">▼</div>
-            <div class="stat-details">
+            <div class="stat-icon-wrap amber">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
+            </div>
+            <div class="stat-info">
               <div class="stat-label">Total Outbound (OUT)</div>
-              <div class="stat-value" id="summaryOutUnits">0</div>
-              <div class="stat-sub">Issued / sold units</div>
+              <div class="stat-number" id="summaryOutUnits">0</div>
+              <div class="stat-subtext">Dispatched items</div>
             </div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-icon primary">⚖️</div>
-            <div class="stat-details">
-              <div class="stat-label">Net Inventory Change</div>
-              <div class="stat-value" id="summaryNetUnits">0</div>
-              <div class="stat-sub">Net volumetric balance</div>
+            <div class="stat-icon-wrap blue">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6l9 6 9-6M3 18l9-6 9 6"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-label">Net Balance</div>
+              <div class="stat-number" id="summaryNetUnits">0</div>
+              <div class="stat-subtext">Volume difference</div>
             </div>
           </div>
         </div>
 
         <!-- Filter Toolbar -->
-        <div class="toolbar">
-          <div class="form-group" style="margin:0; flex:1; min-width:180px;">
-            <input type="date" id="dateFrom" class="filter-select" onchange="loadReport()" style="width:100%;">
+        <div class="toolbar-wrap">
+          <div class="form-group" style="margin:0; flex:1; min-width:160px;">
+            <input type="date" id="dateFrom" class="select-filter" onchange="loadReport()" style="width:100%;">
           </div>
 
-          <div class="form-group" style="margin:0; flex:1; min-width:180px;">
-            <input type="date" id="dateTo" class="filter-select" onchange="loadReport()" style="width:100%;">
+          <div class="form-group" style="margin:0; flex:1; min-width:160px;">
+            <input type="date" id="dateTo" class="select-filter" onchange="loadReport()" style="width:100%;">
           </div>
 
-          <select class="filter-select" id="typeFilter" onchange="loadReport()">
-            <option value="">All Movement Types</option>
+          <select class="select-filter" id="typeFilter" onchange="loadReport()">
+            <option value="">All Types</option>
             <option value="IN">Only Stock IN</option>
             <option value="OUT">Only Stock OUT</option>
           </select>
@@ -102,23 +110,23 @@
           <button class="btn-secondary" onclick="resetReportFilters()">Clear Filters</button>
         </div>
 
-        <!-- Report Data Table Card -->
+        <!-- Report Table Card -->
         <div class="card">
-          <div class="table-responsive">
+          <div class="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>Audit ID</th>
-                  <th>Timestamp</th>
-                  <th>Product Name</th>
+                  <th>ID</th>
+                  <th>Date & Time</th>
+                  <th>Product</th>
                   <th>Category</th>
-                  <th>Movement Type</th>
+                  <th>Type</th>
                   <th>Quantity</th>
-                  <th>Reference / Note</th>
+                  <th>Note</th>
                 </tr>
               </thead>
               <tbody id="reportBody">
-                <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--slate-500);">Generating audit trail...</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:20px; color:var(--gray-500);">Loading report...</td></tr>
               </tbody>
             </table>
           </div>
@@ -148,13 +156,12 @@
       const tbody = document.getElementById('reportBody');
 
       if (!res || !res.ok) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--danger);">Failed to load audit trail.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--red);">Failed to load report data</td></tr>';
         return;
       }
 
       currentReportData = res.data;
 
-      // Update Summary metrics
       let inUnits = 0;
       let outUnits = 0;
       currentReportData.forEach(m => {
@@ -166,26 +173,26 @@
       document.getElementById('summaryOutUnits').textContent = `-${outUnits.toLocaleString()}`;
       const net = inUnits - outUnits;
       document.getElementById('summaryNetUnits').textContent = `${net >= 0 ? '+' : ''}${net.toLocaleString()}`;
-      document.getElementById('summaryNetUnits').style.color = net >= 0 ? 'var(--success)' : 'var(--danger)';
+      document.getElementById('summaryNetUnits').style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
 
       if (currentReportData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--slate-500);">No movement records found for the selected period.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--gray-500);">No movement records found for the selected period.</td></tr>';
         return;
       }
 
       tbody.innerHTML = currentReportData.map(m => `
         <tr>
-          <td><strong>#${m.id}</strong></td>
+          <td>#${m.id}</td>
           <td>${new Date(m.date).toLocaleString()}</td>
           <td><strong>${m.product_name || `Product #${m.product_id}`}</strong></td>
-          <td><span class="pill pill-neutral">${m.category || 'Unassigned'}</span></td>
+          <td><span class="badge badge-neutral">${m.category || '-'}</span></td>
           <td>
-            <span class="pill ${m.type === 'IN' ? 'pill-success' : 'pill-danger'}">
-              ${m.type === 'IN' ? '▲ IN' : '▼ OUT'}
+            <span class="badge ${m.type === 'IN' ? 'badge-success' : 'badge-danger'}">
+              ${m.type === 'IN' ? 'IN' : 'OUT'}
             </span>
           </td>
-          <td><strong>${m.quantity}</strong> units</td>
-          <td>${m.note || '<span style="color:var(--slate-400);">-</span>'}</td>
+          <td><strong>${m.quantity}</strong></td>
+          <td>${m.note || '-'}</td>
         </tr>
       `).join('');
     }
@@ -197,14 +204,13 @@
       loadReport();
     }
 
-    // Export current filtered dataset to CSV
     function exportCSV() {
       if (!currentReportData || currentReportData.length === 0) {
-        showToast('No data available to export.', 'warning');
+        showToast('No data available to export', 'warning');
         return;
       }
 
-      const headers = ['Audit ID', 'Timestamp', 'Product Name', 'Category', 'Movement Type', 'Quantity', 'Note'];
+      const headers = ['ID', 'Date', 'Product', 'Category', 'Type', 'Quantity', 'Note'];
       const rows = currentReportData.map(m => [
         m.id,
         `"${new Date(m.date).toLocaleString()}"`,
@@ -220,11 +226,11 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `IMS_Stock_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `Stock_Report_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('CSV report generated and downloaded!', 'success');
+      showToast('Report exported to CSV', 'success');
     }
 
     loadReport();

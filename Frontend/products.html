@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products Catalog - IMS</title>
+  <title>Products - iONE IMS</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,53 +14,56 @@
     <main class="main-shell">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
-          <div class="page-breadcrumb">iONE Infrastructure / <strong>IT Assets & Equipment</strong></div>
+          <button class="mobile-toggle-btn" onclick="toggleMobileMenu()">☰</button>
+          <div class="breadcrumb">Catalog / <strong>Products</strong></div>
         </div>
         <div class="topbar-right">
-          <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
+          <a href="products.html?filter=low" id="lowStockPill" class="alert-badge-link" style="display:none;"></a>
         </div>
       </header>
 
       <div class="content-area">
         <div class="page-header">
           <div class="page-title">
-            <h1>Enterprise IT Assets & Equipment</h1>
-            <p>Track server hardware, networking, developer laptops, and enterprise software licenses.</p>
+            <h1>Products</h1>
+            <p>Manage product catalog, pricing, suppliers, and reorder levels.</p>
           </div>
-          <button class="btn-primary" style="width:auto; padding:10px 18px; background:#1d4ed8;" onclick="openAddModal()">
-            <span>+ Add Enterprise Asset</span>
+          <button class="btn-primary" onclick="openAddModal()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+            <span>Add Product</span>
           </button>
         </div>
 
         <!-- Filter & Search Toolbar -->
-        <div class="toolbar">
-          <div class="search-input-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Search assets by name, domain, or OEM partner..." oninput="handleSearch()">
+        <div class="toolbar-wrap">
+          <div class="search-box">
+            <span class="search-icon">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </span>
+            <input type="text" id="searchInput" placeholder="Search by name, category, or supplier..." oninput="handleSearch()">
           </div>
 
-          <select class="filter-select" id="categoryFilter" onchange="loadProducts()">
-            <option value="">All Technology Domains</option>
+          <select class="select-filter" id="categoryFilter" onchange="loadProducts()">
+            <option value="">All Categories</option>
           </select>
 
-          <select class="filter-select" id="supplierFilter" onchange="loadProducts()">
-            <option value="">All OEM Partners</option>
+          <select class="select-filter" id="supplierFilter" onchange="loadProducts()">
+            <option value="">All Suppliers</option>
           </select>
 
-          <select class="filter-select" id="statusFilter" onchange="loadProducts()">
+          <select class="select-filter" id="statusFilter" onchange="loadProducts()">
             <option value="">All Stock Levels</option>
-            <option value="in_stock">In Stock (> Limit)</option>
-            <option value="low_stock">Low Stock (≤ Limit)</option>
-            <option value="out_of_stock">Depleted (0)</option>
+            <option value="in_stock">In Stock</option>
+            <option value="low_stock">Low Stock</option>
+            <option value="out_of_stock">Out of Stock</option>
           </select>
 
           <button class="btn-secondary" onclick="resetFilters()">Reset</button>
         </div>
 
-        <!-- Products Data Table Card -->
+        <!-- Products Table Card -->
         <div class="card">
-          <div class="table-responsive">
+          <div class="table-container">
             <table>
               <thead>
                 <tr>
@@ -68,15 +71,15 @@
                   <th>Product Name</th>
                   <th>Category</th>
                   <th>Supplier</th>
-                  <th>Unit Price</th>
-                  <th>Stock Quantity</th>
-                  <th>Threshold</th>
-                  <th>Stock Status</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Limit</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="productsBody">
-                <tr><td colspan="9" style="text-align:center; padding:24px; color:var(--slate-500);">Loading products catalog...</td></tr>
+                <tr><td colspan="9" style="text-align:center; padding:20px; color:var(--gray-500);">Loading products...</td></tr>
               </tbody>
             </table>
           </div>
@@ -89,8 +92,8 @@
   <div class="modal-overlay" id="productModal">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3 id="modalTitle">Add New Product</h3>
-        <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+        <h3 id="modalTitle">Add Product</h3>
+        <button class="modal-close-btn" onclick="closeModal('productModal')">✕</button>
       </div>
       <form id="productForm">
         <div class="modal-body">
@@ -98,10 +101,10 @@
 
           <div class="form-group">
             <label for="pName">Product Name *</label>
-            <input type="text" id="pName" placeholder="e.g. Ergonomic Office Chair" required>
+            <input type="text" id="pName" placeholder="e.g. Dell PowerEdge Server" required>
           </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-row-2">
             <div class="form-group">
               <label for="pCategory">Category</label>
               <select id="pCategory">
@@ -117,14 +120,14 @@
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+          <div class="form-row-3">
             <div class="form-group">
-              <label for="pPrice">Unit Price (₹) *</label>
+              <label for="pPrice">Price (₹) *</label>
               <input type="number" id="pPrice" step="0.01" min="0" placeholder="0.00" required>
             </div>
 
             <div class="form-group">
-              <label for="pQty">Initial Quantity</label>
+              <label for="pQty">Quantity</label>
               <input type="number" id="pQty" min="0" value="0">
             </div>
 
@@ -136,7 +139,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" onclick="closeModal('productModal')">Cancel</button>
-          <button type="submit" class="btn-primary" style="width:auto;" id="saveBtn">Save Product</button>
+          <button type="submit" class="btn-primary" id="saveBtn">Save</button>
         </div>
       </form>
     </div>
@@ -151,13 +154,11 @@
     let categoriesList = [];
     let suppliersList = [];
 
-    // Check URL parameters for direct filters (e.g. products.html?filter=low)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('filter') === 'low') {
       document.getElementById('statusFilter').value = 'low_stock';
     }
 
-    // Load initial dropdown options (Categories & Suppliers)
     async function loadMetaFilters() {
       const [catsRes, supsRes] = await Promise.all([
         apiFetch('/categories'),
@@ -185,7 +186,6 @@
       }
     }
 
-    // Load Products with filters
     async function loadProducts() {
       const search = document.getElementById('searchInput').value.trim();
       const category_id = document.getElementById('categoryFilter').value;
@@ -202,41 +202,41 @@
       const tbody = document.getElementById('productsBody');
 
       if (!res || !res.ok) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--danger);">Failed to load products.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--red);">Failed to load products</td></tr>';
         return;
       }
 
       allProducts = res.data;
 
       if (allProducts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:32px; color:var(--slate-500);">No products match the selected criteria.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:28px; color:var(--gray-500);">No products found matching filters.</td></tr>';
         return;
       }
 
       tbody.innerHTML = allProducts.map(p => {
-        let statusBadge = '';
+        let badgeHtml = '';
         if (p.quantity === 0) {
-          statusBadge = '<span class="pill pill-danger">Out of Stock</span>';
+          badgeHtml = '<span class="badge badge-danger">Out of Stock</span>';
         } else if (p.quantity <= p.low_stock_limit) {
-          statusBadge = '<span class="pill pill-warning">Low Stock</span>';
+          badgeHtml = '<span class="badge badge-warning">Low Stock</span>';
         } else {
-          statusBadge = '<span class="pill pill-success">In Stock</span>';
+          badgeHtml = '<span class="badge badge-success">In Stock</span>';
         }
 
         return `
           <tr>
-            <td><strong>#${p.id}</strong></td>
+            <td>#${p.id}</td>
             <td><strong>${p.name}</strong></td>
-            <td><span class="pill pill-neutral">${p.category || 'Unassigned'}</span></td>
-            <td>${p.supplier || 'Unassigned'}</td>
-            <td>₹${Number(p.price).toFixed(2)}</td>
+            <td><span class="badge badge-neutral">${p.category || '-'}</span></td>
+            <td>${p.supplier || '-'}</td>
+            <td>₹${Number(p.price).toLocaleString('en-IN')}</td>
             <td><strong>${p.quantity}</strong></td>
             <td>${p.low_stock_limit}</td>
-            <td>${statusBadge}</td>
+            <td>${badgeHtml}</td>
             <td>
-              <div class="action-btns">
-                <button class="btn-sm btn-sm-edit" onclick="openEditModal(${p.id})">Edit</button>
-                <button class="btn-sm btn-sm-del" onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')">Delete</button>
+              <div class="btn-action-group">
+                <button class="btn-tbl-sm btn-tbl-edit" onclick="openEditModal(${p.id})">Edit</button>
+                <button class="btn-tbl-sm btn-tbl-delete" onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')">Delete</button>
               </div>
             </td>
           </tr>
@@ -258,16 +258,13 @@
       loadProducts();
     }
 
-    // Open Modal for Add
     function openAddModal() {
-      document.getElementById('modalTitle').textContent = 'Add New Product';
+      document.getElementById('modalTitle').textContent = 'Add Product';
       document.getElementById('editProductId').value = '';
       document.getElementById('productForm').reset();
-      document.getElementById('pQty').disabled = false;
       openModal('productModal');
     }
 
-    // Open Modal for Edit
     function openEditModal(id) {
       const p = allProducts.find(item => item.id === id);
       if (!p) return;
@@ -284,7 +281,6 @@
       openModal('productModal');
     }
 
-    // Save (Create / Update)
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const editId = document.getElementById('editProductId').value;
@@ -307,32 +303,30 @@
       });
 
       if (res && res.ok) {
-        showToast(`Product ${editId ? 'updated' : 'created'} successfully!`, 'success');
+        showToast(`Product ${editId ? 'updated' : 'created'} successfully`, 'success');
         closeModal('productModal');
         loadProducts();
-        updateAlertBadge();
+        updateLowStockAlertBadge();
       } else {
-        showToast(res.data.error || 'Failed to save product.', 'error');
+        showToast(res.data.error || 'Failed to save product', 'error');
       }
     });
 
-    // Delete Product
     async function deleteProduct(id, name) {
-      if (!confirm(`Are you sure you want to permanently delete "${name}"?`)) {
+      if (!confirm(`Are you sure you want to delete "${name}"?`)) {
         return;
       }
 
       const res = await apiFetch(`/products/${id}`, { method: 'DELETE' });
       if (res && res.ok) {
-        showToast('Product deleted successfully.', 'success');
+        showToast('Product deleted', 'success');
         loadProducts();
-        updateAlertBadge();
+        updateLowStockAlertBadge();
       } else {
-        showToast(res.data.error || 'Failed to delete product.', 'error');
+        showToast(res.data.error || 'Failed to delete product', 'error');
       }
     }
 
-    // Initialize
     async function init() {
       await loadMetaFilters();
       await loadProducts();

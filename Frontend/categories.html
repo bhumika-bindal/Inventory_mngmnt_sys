@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Categories - IMS</title>
+  <title>Categories - iONE IMS</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,39 +14,40 @@
     <main class="main-shell">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="mobile-toggle" onclick="toggleMobileMenu()">☰</button>
-          <div class="page-breadcrumb">Catalog / <strong>Categories</strong></div>
+          <button class="mobile-toggle-btn" onclick="toggleMobileMenu()">☰</button>
+          <div class="breadcrumb">Catalog / <strong>Categories</strong></div>
         </div>
         <div class="topbar-right">
-          <a href="products.html?filter=low" id="lowStockPill" class="badge-alert" style="display:none;"></a>
+          <a href="products.html?filter=low" id="lowStockPill" class="alert-badge-link" style="display:none;"></a>
         </div>
       </header>
 
       <div class="content-area">
         <div class="page-header">
           <div class="page-title">
-            <h1>Category Classifications</h1>
-            <p>Organize products into structured categories for streamlined tracking.</p>
+            <h1>Categories</h1>
+            <p>Organize products into functional domains and classifications.</p>
           </div>
-          <button class="btn-primary" style="width:auto; padding:10px 18px;" onclick="openAddCatModal()">
-            <span>+ Add New Category</span>
+          <button class="btn-primary" onclick="openAddCatModal()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+            <span>Add Category</span>
           </button>
         </div>
 
         <div class="card">
-          <div class="table-responsive">
+          <div class="table-container">
             <table>
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Category Name</th>
                   <th>Description</th>
-                  <th>Associated Products</th>
+                  <th>Products</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="categoriesBody">
-                <tr><td colspan="5" style="text-align:center; padding:24px; color:var(--slate-500);">Loading categories...</td></tr>
+                <tr><td colspan="5" style="text-align:center; padding:20px; color:var(--gray-500);">Loading categories...</td></tr>
               </tbody>
             </table>
           </div>
@@ -60,19 +61,23 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 id="catModalTitle">Add Category</h3>
-        <button class="modal-close" onclick="closeModal('catModal')">✕</button>
+        <button class="modal-close-btn" onclick="closeModal('catModal')">✕</button>
       </div>
       <form id="catForm">
         <div class="modal-body">
           <input type="hidden" id="editCatId">
           <div class="form-group">
             <label for="catName">Category Name *</label>
-            <input type="text" id="catName" placeholder="e.g. Industrial Tools" required>
+            <input type="text" id="catName" placeholder="e.g. Cloud Infrastructure" required>
+          </div>
+          <div class="form-group">
+            <label for="catDesc">Description</label>
+            <textarea id="catDesc" rows="2" placeholder="Brief description of this category"></textarea>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" onclick="closeModal('catModal')">Cancel</button>
-          <button type="submit" class="btn-primary" style="width:auto;">Save Category</button>
+          <button type="submit" class="btn-primary">Save Category</button>
         </div>
       </form>
     </div>
@@ -90,29 +95,27 @@
       const tbody = document.getElementById('categoriesBody');
 
       if (!res || !res.ok) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--danger);">Failed to load categories.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--red);">Failed to load categories</td></tr>';
         return;
       }
 
       allCategories = res.data;
 
       if (allCategories.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--slate-500);">No categories found. Click "+ Add New Category" to create one.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--gray-500);">No categories found. Click "Add Category" to create one.</td></tr>';
         return;
       }
 
       tbody.innerHTML = allCategories.map(c => `
         <tr>
-          <td><strong>#${c.id}</strong></td>
+          <td>#${c.id}</td>
           <td><strong>${c.name}</strong></td>
-          <td>${c.description || '<span style="color:var(--slate-400);">No description</span>'}</td>
+          <td>${c.description || '<span style="color:var(--gray-400);">-</span>'}</td>
+          <td><span class="badge badge-info">${c.product_count || 0} Products</span></td>
           <td>
-            <span class="pill pill-primary">${c.product_count || 0} Products</span>
-          </td>
-          <td>
-            <div class="action-btns">
-              <button class="btn-sm btn-sm-edit" onclick="openEditCatModal(${c.id}, '${c.name.replace(/'/g, "\\'")}')">Edit</button>
-              <button class="btn-sm btn-sm-del" onclick="deleteCategory(${c.id}, '${c.name.replace(/'/g, "\\'")}')">Delete</button>
+            <div class="btn-action-group">
+              <button class="btn-tbl-sm btn-tbl-edit" onclick="openEditCatModal(${c.id}, '${c.name.replace(/'/g, "\\'")}', '${(c.description || '').replace(/'/g, "\\'")}')">Edit</button>
+              <button class="btn-tbl-sm btn-tbl-delete" onclick="deleteCategory(${c.id}, '${c.name.replace(/'/g, "\\'")}')">Delete</button>
             </div>
           </td>
         </tr>
@@ -120,16 +123,18 @@
     }
 
     function openAddCatModal() {
-      document.getElementById('catModalTitle').textContent = 'Add New Category';
+      document.getElementById('catModalTitle').textContent = 'Add Category';
       document.getElementById('editCatId').value = '';
-      document.getElementById('catForm').reset();
+      document.getElementById('catName').value = '';
+      document.getElementById('catDesc').value = '';
       openModal('catModal');
     }
 
-    function openEditCatModal(id, name) {
+    function openEditCatModal(id, name, desc) {
       document.getElementById('catModalTitle').textContent = 'Edit Category';
       document.getElementById('editCatId').value = id;
       document.getElementById('catName').value = name;
+      document.getElementById('catDesc').value = desc || '';
       openModal('catModal');
     }
 
@@ -137,35 +142,36 @@
       e.preventDefault();
       const id = document.getElementById('editCatId').value;
       const name = document.getElementById('catName').value.trim();
+      const description = document.getElementById('catDesc').value.trim();
 
       const method = id ? 'PUT' : 'POST';
       const endpoint = id ? `/categories/${id}` : '/categories';
 
       const res = await apiFetch(endpoint, {
         method,
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name, description })
       });
 
       if (res && res.ok) {
-        showToast(`Category ${id ? 'updated' : 'created'} successfully!`, 'success');
+        showToast(`Category ${id ? 'updated' : 'created'} successfully`, 'success');
         closeModal('catModal');
         loadCategories();
       } else {
-        showToast(res.data.error || 'Failed to save category.', 'error');
+        showToast(res.data.error || 'Failed to save category', 'error');
       }
     });
 
     async function deleteCategory(id, name) {
-      if (!confirm(`Are you sure you want to delete category "${name}"? Products in this category will become unassigned.`)) {
+      if (!confirm(`Are you sure you want to delete "${name}"? Products in this category will become unassigned.`)) {
         return;
       }
 
       const res = await apiFetch(`/categories/${id}`, { method: 'DELETE' });
       if (res && res.ok) {
-        showToast('Category deleted successfully.', 'success');
+        showToast('Category deleted', 'success');
         loadCategories();
       } else {
-        showToast(res.data.error || 'Failed to delete category.', 'error');
+        showToast(res.data.error || 'Failed to delete category', 'error');
       }
     }
 

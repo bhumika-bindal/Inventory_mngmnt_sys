@@ -122,13 +122,13 @@ Visit **`http://localhost:3000`** in Google Chrome or Microsoft Edge.
 
 ---
 
-## 🔑 Demo Credentials
+## Demo Credentials
 
 | Role | Username | Password |
 |---|---|---|
-| **iONE Administrator** | `admin` | `admin123` |
+| **Administrator** | `admin` | `admin123` |
 
-*(Click "Auto-Fill" on the login screen for 1-click access).*
+*(Pre-filled on the login screen for quick evaluation).*
 
 ---
 

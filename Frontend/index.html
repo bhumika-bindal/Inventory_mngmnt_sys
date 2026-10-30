@@ -3,73 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>iONE IT Solutions - Enterprise Asset & Inventory System</title>
+  <title>Login - iONE Inventory Management System</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="login-body">
 
-  <div class="login-wrapper">
-    <!-- Left Banner -->
-    <div class="login-banner" style="background: linear-gradient(135deg, #0f2b48 0%, #1e40af 100%);">
-      <div class="login-banner-content">
-        <div style="font-size: 24px; font-weight:800; letter-spacing:1px; color:#60a5fa; margin-bottom: 6px;">iONE IT SOLUTIONS</div>
-        <h2>Engineering Digital Nations.<br><span style="font-size:18px; font-weight:400; color:rgba(255,255,255,0.85);">Since 2009.</span></h2>
-        <p>Enterprise Asset & Inventory Management System for mission-critical Cloud, ERP, AI, Cybersecurity, and Managed Services infrastructure.</p>
-        
-        <ul class="login-features">
-          <li><span>✓</span> 15+ Years Enterprise IT & 500+ Projects Delivered</li>
-          <li><span>✓</span> Mission-Critical Infrastructure for Governments & PSUs</li>
-          <li><span>✓</span> Proprietary Platforms: iTRACE WMS, iHRMS & Anumati</li>
-          <li><span>✓</span> ISO 27001:2022, ISO 9001:2015 & CMMI Level 3 Certified</li>
-        </ul>
-      </div>
-
-      <div style="font-size: 12px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.15); padding-top: 16px;">
-        Designed & Built by <strong>Bhumika</strong> | Intern Project under <strong>Anshul Dogra</strong>
-      </div>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">iONE</div>
+      <h1>Inventory Management System</h1>
+      <p>Please enter your credentials to access the portal</p>
     </div>
 
-    <!-- Right Login Form -->
-    <div class="login-form-side">
-      <div class="brand-badge" style="background:#eff6ff; color:#1d4ed8;">iONE Enterprise Portal</div>
-      <h1>Sign In</h1>
-      <p class="subtitle">Access iONE IT Solutions internal asset and inventory control.</p>
-
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="username">Corporate Username</label>
-          <input type="text" id="username" placeholder="e.g. admin" required autocomplete="username">
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
-        </div>
-
-        <button type="submit" id="submitBtn" class="btn-primary" style="margin-top: 10px; background:#1d4ed8;">
-          <span>Sign In to iONE Dashboard</span>
-          <span>→</span>
-        </button>
-      </form>
-
-      <!-- Demo Credentials Helper -->
-      <div class="demo-chip">
-        <div>
-          <strong>Demo Login:</strong> <code>admin</code> / <code>admin123</code>
-        </div>
-        <button type="button" class="demo-chip-btn" onclick="fillDemoCredentials()">Auto-Fill</button>
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Username" value="admin" required autocomplete="username">
       </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Password" value="admin123" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-primary" style="width:100%; padding:10px; margin-top:8px;">
+        Sign In
+      </button>
+    </form>
+
+    <div class="login-hint-box">
+      Default Login: <code>admin</code> &nbsp;|&nbsp; Password: <code>admin123</code>
+    </div>
+
+    <div class="login-footer-text">
+      iONE IT Solutions Pvt. Ltd. &bull; Internal System
     </div>
   </div>
 
   <script src="js/api.js"></script>
   <script>
-    function fillDemoCredentials() {
-      document.getElementById('username').value = 'admin';
-      document.getElementById('password').value = 'admin123';
-      showToast('Demo credentials entered! Click Sign In.', 'info');
-    }
-
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const usernameInput = document.getElementById('username');
@@ -80,7 +52,7 @@
       const password = passwordInput.value;
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Verifying credentials...</span>';
+      submitBtn.textContent = 'Signing in...';
 
       try {
         const res = await fetch(`${API_URL}/auth/login`, {
@@ -91,24 +63,24 @@
         const data = await res.json();
 
         if (!res.ok) {
-          showToast(data.error || 'Invalid credentials.', 'error');
+          showToast(data.error || 'Invalid username or password', 'error');
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span>Sign In to iONE Dashboard</span> <span>→</span>';
+          submitBtn.textContent = 'Sign In';
           return;
         }
 
         localStorage.setItem('ims_token', data.token);
         localStorage.setItem('ims_user', username);
-        showToast('Authentication verified! Redirecting to iONE Portal...', 'success');
+        showToast('Login successful! Redirecting...', 'success');
 
         setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 500);
+        }, 400);
 
       } catch (err) {
-        showToast('Server not reachable. Please check if backend is running.', 'error');
+        showToast('Unable to connect to server. Check backend status.', 'error');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Sign In to iONE Dashboard</span> <span>→</span>';
+        submitBtn.textContent = 'Sign In';
       }
     });
 
