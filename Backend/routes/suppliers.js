@@ -2,13 +2,13 @@ const router = require('express').Router();
 const db = require('../db');
 const auth = require('../middleware/auth');
 
-// GET all suppliers with count of products supplied
+// GET all suppliers with count of active products supplied
 router.get('/', auth, async (req, res, next) => {
   try {
     const [rows] = await db.query(`
       SELECT s.*, COUNT(p.id) AS product_count
       FROM suppliers s
-      LEFT JOIN products p ON s.id = p.supplier_id
+      LEFT JOIN products p ON s.id = p.supplier_id AND p.is_deleted = 0
       GROUP BY s.id
       ORDER BY s.name ASC
     `);

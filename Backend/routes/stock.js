@@ -24,9 +24,15 @@ router.post('/', auth, async (req, res, next) => {
     await conn.beginTransaction();
 
     // Lock the specific product row for update to prevent concurrency race conditions
-    const [rows] = await conn.query('SELECT quantity, name FROM products WHERE id = ? FOR UPDATE', [product_id]);
-    if (!rows.length) {
-      throw new Error('Product not found.');
+    const [rows] = await conn.query(
+      'SELECT quantity, name, is_deleted FROM products WHERE id = ? FOR UPDATE',
+      [product_id]
+    );
+
+    if (!rows.length || rows[0].is_deleted) {
+      const err = new Error('Product not found or has been decommissioned.');
+      err.statusCode = 404;
+      throw err;
     }
 
     const currentQty = rows[0].quantity;
@@ -43,16 +49,16 @@ router.post('/', auth, async (req, res, next) => {
     // Update product quantity
     await conn.query('UPDATE products SET quantity = ? WHERE id = ?', [newQty, product_id]);
 
-    // Insert audit movement log
+    // Insert audit movement log with permanently preserved product_name
     const [movResult] = await conn.query(
-      'INSERT INTO stock_movements (product_id, type, quantity, note, date) VALUES (?, ?, ?, ?, NOW())',
-      [product_id, type, parsedQty, note ? note.trim() : null]
+      'INSERT INTO stock_movements (product_id, product_name, type, quantity, note, date) VALUES (?, ?, ?, ?, ?, NOW())',
+      [product_id, productName, type, parsedQty, note ? note.trim() : null]
     );
 
     await conn.commit();
 
     res.json({
-      message: `Stock ${type === 'IN' ? 'added' : 'issued'} successfully.`,
+      message: `Stock ${type === 'IN' ? 'added' : 'dispatched'} successfully.`,
       movementId: movResult.insertId,
       productId: product_id,
       productName,
@@ -67,15 +73,24 @@ router.post('/', auth, async (req, res, next) => {
   }
 });
 
-// GET movement history with filters
+// GET movement history with filters (uses LEFT JOIN to preserve history of decommissioned items)
 router.get('/', auth, async (req, res, next) => {
   try {
     const { product_id, type, date_from, date_to } = req.query;
 
     let query = `
-      SELECT m.*, p.name AS product_name, c.name AS category, p.price
+      SELECT 
+        m.id,
+        m.product_id,
+        COALESCE(p.name, m.product_name, 'Decommissioned Item') AS product_name,
+        m.type,
+        m.quantity,
+        m.note,
+        m.date,
+        c.name AS category,
+        p.price
       FROM stock_movements m
-      JOIN products p ON m.product_id = p.id
+      LEFT JOIN products p ON m.product_id = p.id
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE 1=1
     `;
@@ -83,7 +98,7 @@ router.get('/', auth, async (req, res, next) => {
 
     if (product_id) {
       query += ' AND m.product_id = ?';
-      params.push(product_id);
+      params.push(parseInt(product_id, 10));
     }
 
     if (type && ['IN', 'OUT'].includes(type)) {

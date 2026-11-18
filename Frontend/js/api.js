@@ -1,7 +1,6 @@
-// API Configuration
-const API_URL = window.location.origin.includes('localhost:3000') 
-  ? '/api' 
-  : 'http://localhost:3000/api';
+// Dynamic API base URL: defaults to relative '/api' path, supporting any host, port, or cloud deployment.
+// Can be customized via window.__API_URL__ if the backend runs on a different domain.
+const API_URL = window.__API_URL__ || '/api';
 
 // Retrieve saved JWT token from localStorage
 function getToken() {

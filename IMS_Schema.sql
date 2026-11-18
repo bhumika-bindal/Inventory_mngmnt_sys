@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS products (
   price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   quantity INT NOT NULL DEFAULT 0,
   low_stock_limit INT NOT NULL DEFAULT 5,
+  is_deleted TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -51,18 +52,20 @@ CREATE TABLE IF NOT EXISTS products (
   INDEX idx_product_name (name),
   INDEX idx_product_category (category_id),
   INDEX idx_product_supplier (supplier_id),
-  INDEX idx_product_qty (quantity)
+  INDEX idx_product_qty (quantity),
+  INDEX idx_product_status (is_deleted)
 ) ENGINE=InnoDB;
 
 -- 5. Stock Movements Table (Asset Inward / Outward Deployment Ledger)
 CREATE TABLE IF NOT EXISTS stock_movements (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  product_id INT NOT NULL,
+  product_id INT NULL,
+  product_name VARCHAR(150) DEFAULT NULL,
   type ENUM('IN','OUT') NOT NULL,
   quantity INT NOT NULL,
   note VARCHAR(255) DEFAULT NULL,
   date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL ON UPDATE CASCADE,
   INDEX idx_movement_product (product_id),
   INDEX idx_movement_date (date),
   INDEX idx_movement_type (type)

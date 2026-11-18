@@ -114,7 +114,13 @@ npm install
 npm run seed
 ```
 
-### 4. Start Server
+### 4. Run Automated Test Suite
+```bash
+npm test
+# Executes 24 end-to-end integration tests covering auth, CRUD, stock sync, audit preservation, and negative validation
+```
+
+### 5. Start Server
 ```bash
 npm start
 ```
@@ -137,6 +143,7 @@ Visit **`http://localhost:3000`** in Google Chrome or Microsoft Edge.
 - [`IMS_System_Design.md`](IMS_System_Design.md) – Enterprise 3-Tier Architecture & DFDs
 - [`IMS_ER_Diagram.md`](IMS_ER_Diagram.md) – Relational Crow's Foot ER Diagram with Mermaid
 - [`IMS_UIUX_Design.md`](IMS_UIUX_Design.md) – UI/UX Wireframes & Visual Tokens
+- [`IMS_Testing_Report.md`](IMS_Testing_Report.md) – Automated Test Report (24/24 Test Cases Passed)
 - [`IMS_Schema.sql`](IMS_Schema.sql) – MySQL Production Schema & Initial Seed Data
 
 ---

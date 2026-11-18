@@ -2,13 +2,13 @@ const router = require('express').Router();
 const db = require('../db');
 const auth = require('../middleware/auth');
 
-// GET all categories with product counts
+// GET all categories with product counts (active products only)
 router.get('/', auth, async (req, res, next) => {
   try {
     const [rows] = await db.query(`
       SELECT c.*, COUNT(p.id) AS product_count
       FROM categories c
-      LEFT JOIN products p ON c.id = p.category_id
+      LEFT JOIN products p ON c.id = p.category_id AND p.is_deleted = 0
       GROUP BY c.id
       ORDER BY c.name ASC
     `);
